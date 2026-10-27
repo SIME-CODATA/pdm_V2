@@ -1,0 +1,57 @@
+@theme {
+  /* ====================================
+     TIPOGRAFIA
+  ==================================== */
+
+  --font-sans: 'Roboto', Arial, sans-serif;
+  --font-display: 'Bebas Neue', Impact, sans-serif;
+
+  /* ====================================
+     CORES INSTITUCIONAIS
+  ==================================== */
+
+  --color-primary: #272361;
+  --color-secondary: #0e7ba8;
+  --color-accent: #03a8c5;
+  --color-blue-dark: #124e8a;
+
+  /* ====================================
+     CORES DOS EIXOS
+     Provisórias até aprovação do layout
+  ==================================== */
+
+  --color-axis-environment: #479745;
+  --color-axis-education: #792d49;
+  --color-axis-health: #f7991c;
+  --color-axis-security: #0000ab;
+
+  /* ====================================
+     SUPERFÍCIES E TEXTO
+  ==================================== */
+
+  --color-surface: #ffffff;
+  --color-surface-muted: #f3f3f3;
+  --color-grid-line: #e1e1e1;
+  --color-text-primary: #272361;
+  --color-text-inverse: #ffffff;
+
+  /* ====================================
+     ESPAÇAMENTOS
+  ==================================== */
+
+  --spacing-gutter: 1.5rem;
+  --spacing-section: 4rem;
+  --spacing-section-lg: 6rem;
+
+  /* ====================================
+     LARGURA DE CONTEÚDO
+  ==================================== */
+
+  --container-content: 1200px;
+}
+
+:root {
+  /* Fundo quadriculado */
+  --pdm-grid-size: 113px;
+  --pdm-grid-width: 1px;
+}
