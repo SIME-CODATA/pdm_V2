@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+@import './styles/tokens.css';
+
+@layer base {
+  html {
+    min-height: 100%;
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+
+    font-family: var(--font-sans);
+    color: var(--color-text-primary);
+
+    /* Fundo global */
+    background-color: var(--color-surface-muted);
+
+    background-image:
+      linear-gradient(
+        to right,
+        var(--color-grid-line) var(--pdm-grid-width),
+        transparent var(--pdm-grid-width)
+      ),
+      linear-gradient(
+        to bottom,
+        var(--color-grid-line) var(--pdm-grid-width),
+        transparent var(--pdm-grid-width)
+      );
+
+    background-size: var(--pdm-grid-size) var(--pdm-grid-size);
+
+    background-attachment: fixed;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
