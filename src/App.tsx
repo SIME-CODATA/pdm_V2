@@ -1,6 +1,6 @@
 import { AppProviders } from '@/app/providers/AppProviders'
+import { HomePage } from '@/features/home/pages/HomePage'
 import { Navbar } from '@/shared/components/layout/Navbar/Navbar'
-import { Container } from '@/shared/components/layout/Container'
 
 export default function App() {
   return (
@@ -8,9 +8,7 @@ export default function App() {
       <Navbar />
 
       <main>
-        <Container className="py-12">
-            
-        </Container>
+        <HomePage />
       </main>
     </AppProviders>
   )

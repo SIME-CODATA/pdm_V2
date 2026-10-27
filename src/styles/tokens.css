@@ -30,11 +30,12 @@
   ==================================== */
 
   --color-surface: #ffffff;
-  --color-surface-muted: #f3f3f3;
+  --color-surface-muted: #ffffff;
   --color-grid-line: #e1e1e1;
   --color-text-primary: #272361;
   --color-text-inverse: #ffffff;
   --color-search-surface: #edf2f4;
+  --color-home-documents: #6acadb;
 
   /* ====================================
      ESPAÇAMENTOS
