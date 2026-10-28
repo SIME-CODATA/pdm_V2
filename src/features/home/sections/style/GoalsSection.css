@@ -1,0 +1,28 @@
+.goals-section__panel {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+
+  /* Não esconder o conteúdo que ultrapassa o painel */
+  overflow: visible;
+}
+
+.goals-section__cards {
+  /*
+   * Espaço adicional nas laterais.
+   * Cresce progressivamente até 60px.
+   *
+   * Em telas menores, permanece em 0.
+   */
+  --goals-card-bleed: clamp(0px, calc((100vw - 1232px) / 2), 60px);
+
+  margin-inline: calc(0px - var(--goals-card-bleed));
+}
+
+@media (max-width: 1023px) {
+  .goals-section__cards {
+    margin-inline: 0;
+    padding-inline: 1.5rem;
+  }
+}
