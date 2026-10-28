@@ -2,6 +2,7 @@ import { CircleDot, ClipboardCheck, Coins } from 'lucide-react'
 
 import { homeContent } from '../data/home.content'
 import { MoreButton } from '../components/MoreButton'
+import backgroundImageUrl from '@/assets/images/fundo_home_secao_planejamento.svg'
 
 const highlightIcons = {
   transparency: ClipboardCheck,
@@ -10,8 +11,7 @@ const highlightIcons = {
 } as const
 
 export function GovernanceSection() {
-  const { heading, description, backgroundImageUrl, highlights, moreUrl } =
-    homeContent.governance
+  const { heading, description, highlights, moreUrl } = homeContent.governance
 
   return (
     <section
@@ -33,7 +33,7 @@ export function GovernanceSection() {
         <div className="px-gutter py-14 sm:px-8 lg:py-20 lg:pr-12 lg:pl-[clamp(2rem,9.5vw,11.25rem)]">
           <h2
             id="governance-title"
-            className="max-w-lg font-display text-[clamp(2.25rem,3.4vw,3.5rem)] leading-[1.05]"
+            className="font-display max-w-lg text-[clamp(2.25rem,3.4vw,3.5rem)] leading-[1.05]"
           >
             {heading}
           </h2>
@@ -41,7 +41,7 @@ export function GovernanceSection() {
         </div>
 
         {/* Caixa ciano alinhada naturalmente à borda direita da viewport. */}
-        <div className="flex min-h-77.5 flex-col justify-center gap-7 rounded-tl-3xl rounded-bl-3xl bg-home-documents px-gutter py-10 sm:px-12 lg:min-h-80 lg:py-14">
+        <div className="bg-home-documents px-gutter flex min-h-77.5 flex-col justify-center gap-7 rounded-tl-3xl rounded-bl-3xl py-10 sm:px-12 lg:min-h-80 lg:py-14">
           {highlights.map(({ id, label }) => {
             const Icon = highlightIcons[id]
             return (

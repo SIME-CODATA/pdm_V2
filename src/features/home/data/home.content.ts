@@ -1,5 +1,5 @@
 /**
- * Conteúdo temporário baseado no Figma.
+ /* Conteúdo temporário baseado no Figma.
  * Futuramente o CMS/API substituirá estes valores sem alterar as seções.
  *
  * As imagens são opcionais. Quando os arquivos estiverem disponíveis,
@@ -7,8 +7,17 @@
  * imageUrl: '/images/home/planejamento.webp'
  *
  * Não utilize texto ou notícias provisórias como publicação oficial.
- */
+ /** */
+import environmentImage from '@/assets/images/meio_ambiente.svg'
+import educationImage from '@/assets/images/educacao.svg'
+import securytImage from '@/assets/images/segurança.svg'
+import healthImage from '@/assets/images/saude.svg'
+import newsImage from '@/assets/images/news_image.svg'
 
+import environmentIcon from '@/assets/icons/psychiatry.svg'
+import educationIcon from '@/assets/icons/school.svg'
+import healthIcon from '@/assets/icons/ecg_heart.svg'
+import securityIcon from '@/assets/icons/verified_user.svg'
 export interface HomeGovernanceContent {
   heading: string
   description: string
@@ -34,6 +43,7 @@ export interface HomeGoalContent {
   count: number
   label: string
   imageUrl: string | null
+  iconUrl: string | null
 }
 
 export interface HomeNewsContent {
@@ -77,25 +87,29 @@ export const homeContent: {
       id: 'environment',
       count: 25,
       label: 'Meio Ambiente e Sustentabilidade',
-      imageUrl: null,
+      imageUrl: environmentImage,
+      iconUrl: environmentIcon,
     },
     {
       id: 'education',
       count: 48,
       label: 'Educação Básica, Fundamental e Superior',
-      imageUrl: null,
+      imageUrl: educationImage,
+      iconUrl: educationIcon,
     },
     {
       id: 'health',
       count: 74,
       label: 'Saúde, Odontologia e Psicologia',
-      imageUrl: null,
+      imageUrl: healthImage,
+      iconUrl: healthIcon,
     },
     {
       id: 'security',
       count: 74,
       label: 'Segurança e Policiamento',
-      imageUrl: null,
+      imageUrl: securytImage,
+      iconUrl: securityIcon,
     },
   ],
   news: {
@@ -106,7 +120,7 @@ export const homeContent: {
       'Intervenções contribuem para a fluidez, redistribuindo o tráfego e facilitando os acessos à região de Interlagos',
     date: '2026-09-07',
     dateLabel: '07/09/2026',
-    imageUrl: null,
+    imageUrl: newsImage,
     articleUrl: null,
   },
 }
