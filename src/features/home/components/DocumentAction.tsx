@@ -21,14 +21,24 @@ export function DocumentAction({ label, href }: DocumentActionProps) {
 
   if (!href) {
     return (
-      <button type="button" disabled title="Documento ainda não disponível" className={`${styles} cursor-not-allowed opacity-80`}>
+      <button
+        type="button"
+        disabled
+        title="Documento ainda não disponível"
+        className={`${styles} cursor-not-allowed opacity-80`}
+      >
         {content}
       </button>
     )
   }
 
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className={`${styles} focus-visible:outline-primary transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2`}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${styles} focus-visible:outline-primary transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2`}
+    >
       {content}
     </a>
   )

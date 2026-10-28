@@ -18,7 +18,7 @@ export function MoreButton({ href, label = 'Saiba mais' }: MoreButtonProps) {
 
   if (!href) {
     return (
-      <button type="button" className={`${buttonStyle} cursor-not-allowed opacity-85`} disabled>
+      <button type="button" className={`${buttonStyle} cursor-not-allowed`} disabled>
         {inner}
       </button>
     )
