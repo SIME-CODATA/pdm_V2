@@ -1,0 +1,46 @@
+/* Tokens locais da página. Não modificam o grid global do body. */
+.about-page-width {
+  width: min(calc(100% - 3rem), 75rem);
+  margin-inline: auto;
+}
+
+.about-edge-tag {
+  position: absolute;
+  z-index: 5;
+  top: -12px;
+  right: 0;
+  width: clamp(175px, 17vw, 225px);
+  text-align: left;
+}
+
+.about-edge-tag__eyebrow {
+  display: block;
+  padding-left: 0.15rem;
+  padding-bottom: 0.25rem;
+  color: #999;
+  font: 12px/1.1 Roboto, sans-serif;
+}
+
+.about-edge-tag__title {
+  display: block;
+  padding: 0.45rem 0.8rem;
+  border-radius: 3px 0 0 3px;
+  background: #0079ab;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+@media (max-width: 767px) {
+  .about-page-width { width: min(calc(100% - 2rem), 75rem); }
+  .about-edge-tag { position: relative; top: auto; right: auto; margin-left: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-topics *, .about-axes *, .about-timeline * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
