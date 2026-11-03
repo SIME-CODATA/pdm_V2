@@ -10,4 +10,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      '/pdm-api': {
+        target: 'https://projetos.codata.prefeitura.sp.gov.br',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p) => p.replace(/^\/pdm-api/, ''),
+      },
+    },
+  },
 })

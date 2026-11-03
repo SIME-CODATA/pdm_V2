@@ -1,0 +1,54 @@
+.about-monitoring__background {
+  background: #eaeaea;
+  margin-right: clamp(0px, 8vw, 7rem);
+}
+.about-monitoring__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(270px, 0.8fr);
+  gap: 3rem;
+  align-items: center;
+  min-height: 430px;
+  padding-block: 2.5rem;
+}
+.about-monitoring__laptop {
+  align-self: center;
+  min-height: 270px;
+}
+.about-monitoring__laptop img {
+  width: 100%;
+  max-height: 515px;
+  object-fit: contain;
+  margin-top: -9rem;
+}
+.about-monitoring__mock {
+  width: min(100%, 520px);
+  margin: auto;
+}
+.about-monitoring__mock-screen {
+  height: 245px;
+  border: 13px solid #222;
+  border-radius: 12px 12px 0 0;
+  background: white;
+  padding: 1.3rem;
+}
+.about-monitoring__mock-base {
+  height: 16px;
+  background: linear-gradient(#c9c9c9, #898989);
+  border-radius: 0 0 45% 45%;
+}
+.about-monitoring__text {
+  min-width: 0;
+  padding-block: 1rem;
+}
+@media (max-width: 767px) {
+  .about-monitoring__background {
+    margin-right: 0;
+  }
+  .about-monitoring__layout {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .about-monitoring__laptop {
+    min-height: 200px;
+  }
+}

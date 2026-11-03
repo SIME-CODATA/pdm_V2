@@ -1,0 +1,26 @@
+.about-history__banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 145px;
+}
+.about-history__banner::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: rgb(0 100 128 / 0.2);
+}
+.about-history__banner > .about-page-width {
+  z-index: 1;
+}
+.about-history__content {
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 0.8fr);
+  gap: clamp(2rem, 8vw, 10rem);
+}
+@media (max-width: 767px) {
+  .about-history__content {
+    grid-template-columns: 1fr;
+  }
+}

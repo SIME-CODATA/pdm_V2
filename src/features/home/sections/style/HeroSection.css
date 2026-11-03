@@ -1,0 +1,50 @@
+.hero-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  background-color: var(--color-surface);
+}
+
+/* Conteúdo esquerdo */
+.hero-section__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  min-width: 0;
+  padding: 3.5rem 1.5rem;
+}
+
+/* Painel de documentos */
+.hero-section__documents {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  min-width: 0;
+  padding: 2.5rem clamp(1.5rem, 4vw, 3rem);
+
+  background-color: var(--color-home-documents);
+  border-radius: 1.75rem 0 0 1.75rem;
+}
+
+/* Desktop */
+@media (min-width: 64rem) {
+  .hero-section {
+    min-height: 28rem;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      clamp(24rem, 33.333vw, 32rem);
+  }
+
+  .hero-section__content {
+    padding-left: clamp(2rem, 9.5vw, 11.25rem);
+    padding-right: 2.5rem;
+  }
+
+  .hero-section__documents {
+    align-self: center;
+    min-height: 19.5rem;
+  }
+}
