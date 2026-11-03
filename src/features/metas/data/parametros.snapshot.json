@@ -1,0 +1,330 @@
+{
+  "regionalizacao": [
+    {
+      "id": 5,
+      "sigla": "Centro",
+      "nome": "<b> Centro </b>",
+      "subprefeituras": [{ "id": 15, "sigla": "SE", "nome": "SE" }]
+    },
+    {
+      "id": 3,
+      "sigla": "ZL",
+      "nome": "Zona <b> Leste </b>",
+      "subprefeituras": [
+        { "id": 26, "sigla": "AF", "nome": "ARICANDUVA-FORMOSA-CARRAO" },
+        { "id": 19, "sigla": "CT", "nome": "CIDADE TIRADENTES" },
+        { "id": 31, "sigla": "EM", "nome": "ERMELINO MATARAZZO" },
+        { "id": 6, "sigla": "GU", "nome": "GUAIANASES" },
+        { "id": 16, "sigla": "IQ", "nome": "ITAQUERA" },
+        { "id": 13, "sigla": "IT", "nome": "ITAIM PAULISTA" },
+        { "id": 2, "sigla": "MO", "nome": "MOOCA" },
+        { "id": 9, "sigla": "MP", "nome": "SAO MIGUEL" },
+        { "id": 25, "sigla": "PE", "nome": "PENHA" },
+        { "id": 8, "sigla": "SB", "nome": "SAPOPEMBA" },
+        { "id": 17, "sigla": "SM", "nome": "SAO MATEUS" },
+        { "id": 21, "sigla": "VP", "nome": "VILA PRUDENTE" }
+      ]
+    },
+    {
+      "id": 1,
+      "sigla": "ZN",
+      "nome": "Zona <b> Norte </b>",
+      "subprefeituras": [
+        { "id": 11, "sigla": "CV", "nome": "CASA VERDE-CACHOEIRINHA" },
+        { "id": 24, "sigla": "FO", "nome": "FREGUESIA-BRASILANDIA" },
+        { "id": 10, "sigla": "JT", "nome": "JACANA-TREMEMBE" },
+        { "id": 28, "sigla": "MG", "nome": "VILA MARIA-VILA GUILHERME" },
+        { "id": 30, "sigla": "PJ", "nome": "PIRITUBA-JARAGUA" },
+        { "id": 18, "sigla": "PR", "nome": "PERUS" },
+        { "id": 27, "sigla": "ST", "nome": "SANTANA-TUCURUVI" }
+      ]
+    },
+    {
+      "id": 4,
+      "sigla": "ZO",
+      "nome": "Zona <b> Oeste </b>",
+      "subprefeituras": [
+        { "id": 14, "sigla": "BT", "nome": "BUTANTA" },
+        { "id": 4, "sigla": "LA", "nome": "LAPA" },
+        { "id": 22, "sigla": "PI", "nome": "PINHEIROS" }
+      ]
+    },
+    {
+      "id": 2,
+      "sigla": "ZS",
+      "nome": "Zona <b> Sul </b>",
+      "subprefeituras": [
+        { "id": 1, "sigla": "AD", "nome": "CIDADE ADEMAR" },
+        { "id": 12, "sigla": "CL", "nome": "CAMPO LIMPO" },
+        { "id": 32, "sigla": "CS", "nome": "CAPELA DO SOCORRO" },
+        { "id": 3, "sigla": "IP", "nome": "IPIRANGA" },
+        { "id": 29, "sigla": "MB", "nome": "M BOI MIRIM" },
+        { "id": 23, "sigla": "PA", "nome": "PARELHEIROS" },
+        { "id": 7, "sigla": "SA", "nome": "SANTO AMARO" }
+      ]
+    }
+  ],
+  "orgaos": [
+    { "id": 44, "sigla": "ADESAMPA", "nome": "Agência São Paulo de Desenvolvimento" },
+    { "id": 2, "sigla": "CC", "nome": "Casa Civil" },
+    { "id": 43, "sigla": "CET", "nome": "Companhia de Engenharia de Tráfego" },
+    { "id": 3, "sigla": "CGM", "nome": "Controladoria Geral do Município" },
+    { "id": 45, "sigla": "COHAB", "nome": "Companhia Metropolitana de Habitação de São Paulo" },
+    { "id": 46, "sigla": "FPD", "nome": "Fundação Paulistana para o Desenvolvimento" },
+    { "id": 40, "sigla": "FPTEC", "nome": "Fundação Paulistana de Educação, Tecnologia e Cultura" },
+    { "id": 42, "sigla": "IPREM", "nome": "Instituto de Previdência Municipal de São Paulo" },
+    { "id": 4, "sigla": "PGM", "nome": "Procuradoria Geral do Município" },
+    { "id": 8, "sigla": "SECLIMA", "nome": "Secretaria Executiva de Mudanças Climáticas" },
+    { "id": 6, "sigla": "SECOM", "nome": "Secretaria Especial de Comunicação" },
+    { "id": 7, "sigla": "SEDP", "nome": "Secretaria Executiva de Desestatização e Parcerias" },
+    { "id": 22, "sigla": "SEGES", "nome": "Secretaria Municipal de Gestão" },
+    { "id": 23, "sigla": "SEHAB", "nome": "Secretaria Municipal de Habitação" },
+    { "id": 11, "sigla": "SELIMP", "nome": "Secretaria Executiva de Limpeza Urbana" },
+    { "id": 21, "sigla": "SEME", "nome": "Secretaria Municipal de Esportes e Lazer" },
+    { "id": 9, "sigla": "SEPE", "nome": "Secretaria Executiva de Projetos Estratégicos" },
+    { "id": 33, "sigla": "SEPLAN", "nome": "Secretaria Municipal de Planejamento e Eficiência" },
+    { "id": 10, "sigla": "SEPM", "nome": "Secretaria Executiva do Programa Mananciais" },
+    { "id": 12, "sigla": "SERI", "nome": "Secretaria Especial de Relações Institucionais" },
+    {
+      "id": 35,
+      "sigla": "SESANA",
+      "nome": "Secretaria Executiva de Segurança Alimentar e Nutricional"
+    },
+    { "id": 13, "sigla": "SF", "nome": "Secretaria Municipal da Fazenda" },
+    { "id": 5, "sigla": "SGM", "nome": "Secretaria de Governo Municipal" },
+    {
+      "id": 34,
+      "sigla": "SIME",
+      "nome": "Secretaria Executiva de Informações e Monitoramento Estratégico"
+    },
+    { "id": 24, "sigla": "SIURB", "nome": "Secretaria Municipal de Infraestrutura e Obras" },
+    {
+      "id": 1,
+      "sigla": "SMADS",
+      "nome": "Secretaria Municipal de Assistência e Desenvolvimento Social"
+    },
+    { "id": 17, "sigla": "SMC", "nome": "Secretaria Municipal de Cultura" },
+    {
+      "id": 18,
+      "sigla": "SMDET",
+      "nome": "Secretaria Municipal de Desenvolvimento Econômico e Trabalho"
+    },
+    { "id": 19, "sigla": "SMDHC", "nome": "Secretaria Municipal de Direitos Humanos e Cidadania" },
+    { "id": 20, "sigla": "SME", "nome": "Secretaria Municipal de Educação" },
+    { "id": 25, "sigla": "SMIT", "nome": "Secretaria Municipal de Inovação e Tecnologia" },
+    { "id": 26, "sigla": "SMJ", "nome": "Secretaria Municipal de Justiça" },
+    { "id": 14, "sigla": "SMPED", "nome": "Secretaria Municipal da Pessoa com Deficiência" },
+    { "id": 28, "sigla": "SMRI", "nome": "Secretaria Municipal de Relações Internacionais" },
+    { "id": 15, "sigla": "SMS", "nome": "Secretaria Municipal da Saúde" },
+    { "id": 29, "sigla": "SMSU", "nome": "Secretaria Municipal de Segurança Urbana" },
+    { "id": 16, "sigla": "SMSUB", "nome": "Secretaria Municipal das Subprefeituras" },
+    { "id": 27, "sigla": "SMT", "nome": "Secretaria Municipal de Mobilidade e Trânsito" },
+    { "id": 30, "sigla": "SMTUR", "nome": "Secretaria Municipal de Turismo" },
+    { "id": 31, "sigla": "SMUL", "nome": "Secretaria Municipal de Urbanismo e Licenciamento" },
+    { "id": 38, "sigla": "SPObras", "nome": "SPObras" },
+    { "id": 36, "sigla": "SPRegula", "nome": "SPRegula" },
+    { "id": 37, "sigla": "SPTrans", "nome": "SPTrans" },
+    { "id": 41, "sigla": "SPTuris", "nome": "São Paulo Turismo" },
+    { "id": 39, "sigla": "SPUrbanismo", "nome": "SPUrbanismo" },
+    { "id": 32, "sigla": "SVMA", "nome": "Secretaria Municipal do Verde e do Meio Ambiente" },
+    { "id": 47, "sigla": "Subs", "nome": "Subprefeituras" }
+  ],
+  "eixos": [
+    {
+      "id": 1,
+      "nome": "Universo Sp",
+      "cor": "#3DB54A",
+      "temas": [
+        { "id": 1, "nome": "Natureza e ambiente" },
+        { "id": 2, "nome": "Habitação de qualidade" },
+        { "id": 3, "nome": "Infraestrutura e integração" },
+        { "id": 4, "nome": "Mobilidade" },
+        { "id": 5, "nome": "Requalificação urbana" }
+      ]
+    },
+    {
+      "id": 2,
+      "nome": "Viver São Paulo",
+      "cor": "#F16622",
+      "temas": [
+        { "id": 6, "nome": "Segurança" },
+        { "id": 7, "nome": "Saúde e bem-estar" },
+        { "id": 8, "nome": "Educação" },
+        { "id": 9, "nome": "Proteção social e cidadania plena" },
+        { "id": 10, "nome": "Cultura, Esporte e Lazer" }
+      ]
+    },
+    {
+      "id": 3,
+      "nome": "Cidade Empreendedora",
+      "cor": "#0000AB",
+      "temas": [
+        { "id": 11, "nome": "Ambiente de negócios" },
+        { "id": 12, "nome": "Economia criativa" },
+        { "id": 13, "nome": "Qualificação profissional, emprego e renda" }
+      ]
+    },
+    {
+      "id": 4,
+      "nome": "Capital Do Futuro",
+      "cor": "#792D49",
+      "temas": [
+        { "id": 14, "nome": "Modernização e inovação" },
+        { "id": 15, "nome": "Transparência e participação cidadã" },
+        { "id": 16, "nome": "Governo ágil e acessível a todos" }
+      ]
+    }
+  ],
+  "planos_setoriais": [
+    { "id": 13, "nome": "AIU Setor Central" },
+    { "id": 26, "nome": "Operação Urbana Faria Lima" },
+    { "id": 23, "nome": "Operação Urbana Água Branca" },
+    { "id": 4, "nome": "Operação Urbana Água Espraiada" },
+    { "id": 6, "nome": "Planejamento Estratégico da CGM 2024-2026" },
+    { "id": 28, "nome": "Plano Cicloviário" },
+    { "id": 2, "nome": "Plano Diretor Estratégico" },
+    { "id": 16, "nome": "Plano Diretor de Drenagem" },
+    { "id": 12, "nome": "Plano Emergencial de Calçadas" },
+    { "id": 25, "nome": "Plano Municipal de Agroecologia e Desenvolvimento Rural Sustentável" },
+    { "id": 1, "nome": "Plano Municipal de Arborização Urbana" },
+    { "id": 24, "nome": "Plano Municipal de Assistência Social" },
+    { "id": 8, "nome": "Plano Municipal de Ações para Pessoas com Deficiência" },
+    { "id": 29, "nome": "Plano Municipal de Cultura" },
+    { "id": 10, "nome": "Plano Municipal de Desenvolvimento Econômico" },
+    { "id": 7, "nome": "Plano Municipal de Desestatização" },
+    { "id": 18, "nome": "Plano Municipal de Educação" },
+    { "id": 15, "nome": "Plano Municipal de Educação Ambiental" },
+    { "id": 11, "nome": "Plano Municipal de Esportes e Lazer" },
+    { "id": 19, "nome": "Plano Municipal de Mobilidade Urbana" },
+    { "id": 27, "nome": "Plano Municipal de Promoção da Igualdade Racial" },
+    { "id": 14, "nome": "Plano Municipal de Redução de Riscos" },
+    { "id": 9, "nome": "Plano Municipal de Saúde" },
+    { "id": 22, "nome": "Plano Municipal de Áreas Protegidas, Áreas Verdes e Espaços Livres" },
+    { "id": 20, "nome": "Plano Municipal pela Primeira Infância" },
+    { "id": 5, "nome": "Plano de Ação Climática do Município de São Paulo" },
+    { "id": 21, "nome": "Plano de Gestão Integrada de Resíduos Sólidos" },
+    { "id": 17, "nome": "Plano de Turismo Municipal" },
+    { "id": 3, "nome": "Área de Intervenção Urbana Setor Central" }
+  ],
+  "ods": [
+    {
+      "id": 1,
+      "numero": 1,
+      "nome": "Erradicação Da Pobreza",
+      "cor": "#E5243B",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/17"
+    },
+    {
+      "id": 2,
+      "numero": 2,
+      "nome": "Fome Zero E Agricultura Sustentável ",
+      "cor": "#dda63a",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/18"
+    },
+    {
+      "id": 3,
+      "numero": 3,
+      "nome": "Saúde E Bem-Estar",
+      "cor": "#4c9f38",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/19"
+    },
+    {
+      "id": 4,
+      "numero": 4,
+      "nome": "Educação De Qualidade ",
+      "cor": "#c5192d",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/20"
+    },
+    {
+      "id": 5,
+      "numero": 5,
+      "nome": "Igualdade De Gênero",
+      "cor": "#ff3a21",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/21"
+    },
+    {
+      "id": 6,
+      "numero": 6,
+      "nome": "Água Potável E Saneamento",
+      "cor": "#26bde2",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/22"
+    },
+    {
+      "id": 7,
+      "numero": 7,
+      "nome": "Energia Limpa E Acessível",
+      "cor": "#fcc30b",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/23"
+    },
+    {
+      "id": 8,
+      "numero": 8,
+      "nome": "Trabalho Decente E Crescimento Econômico",
+      "cor": "#a21942",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/24"
+    },
+    {
+      "id": 9,
+      "numero": 9,
+      "nome": "Indústria, Inovação E Infraestrutura",
+      "cor": "#fd6925",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/25"
+    },
+    {
+      "id": 10,
+      "numero": 10,
+      "nome": "Redução Das Desigualdades",
+      "cor": "#dd1367",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/26"
+    },
+    {
+      "id": 11,
+      "numero": 11,
+      "nome": "Cidades E Comunidades Sustentáveis",
+      "cor": "#fd9d24",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/27"
+    },
+    {
+      "id": 12,
+      "numero": 12,
+      "nome": "Consumo E Produção Responsáveis",
+      "cor": "#bf8b2e",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/28"
+    },
+    {
+      "id": 13,
+      "numero": 13,
+      "nome": "Ação Contra A Mudança Global Do Clima",
+      "cor": "#3f7e44",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/29"
+    },
+    {
+      "id": 14,
+      "numero": 14,
+      "nome": "Vida Na Água",
+      "cor": "#0a97d9",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/30"
+    },
+    {
+      "id": 15,
+      "numero": 15,
+      "nome": "Vida Terrestre",
+      "cor": "#56c02b",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/31"
+    },
+    {
+      "id": 16,
+      "numero": 16,
+      "nome": "Paz, Justiça E Instituições Eficazes",
+      "cor": "#00689d",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/32"
+    },
+    {
+      "id": 17,
+      "numero": 17,
+      "nome": "Parcerias E Meios De Implementação",
+      "cor": "#19486a",
+      "icone": "http://programademetas.prefeitura.sp.gov.br/api/static/images/33"
+    }
+  ]
+}

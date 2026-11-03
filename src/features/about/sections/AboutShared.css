@@ -18,7 +18,9 @@
   padding-left: 0.15rem;
   padding-bottom: 0.25rem;
   color: #999;
-  font: 12px/1.1 Roboto, sans-serif;
+  font:
+    12px/1.1 Roboto,
+    sans-serif;
 }
 
 .about-edge-tag__title {
@@ -33,12 +35,21 @@
 }
 
 @media (max-width: 767px) {
-  .about-page-width { width: min(calc(100% - 2rem), 75rem); }
-  .about-edge-tag { position: relative; top: auto; right: auto; margin-left: auto; }
+  .about-page-width {
+    width: min(calc(100% - 2rem), 75rem);
+  }
+  .about-edge-tag {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-left: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .about-topics *, .about-axes *, .about-timeline * {
+  .about-topics *,
+  .about-axes *,
+  .about-timeline * {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
