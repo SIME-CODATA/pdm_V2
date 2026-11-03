@@ -1,0 +1,9 @@
+/* Ajustes isolados para a apresentação. Mantém o MetasPage.css existente e o mapa intacto. */
+.metas-page__workspace{position:relative}
+.metas-page__heading h2{font-family:var(--font-display),'Bebas Neue',sans-serif;font-weight:500}
+.metas-page__switch{box-shadow:none}
+.metas-page__grid{background:transparent;overflow:visible;column-gap:20px;align-items:start;min-height:0;border-radius:0}
+.metas-page__map-panel{border-radius:18px;overflow:hidden}
+.metas-page__sidebar{border-radius:18px;overflow:hidden}
+.metas-page__map-shell>.metas-map__canvas{border-radius:18px 18px 0 0}
+@media(max-width:980px){.metas-page__grid{row-gap:18px}}

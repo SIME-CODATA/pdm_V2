@@ -9,7 +9,14 @@ import { AssetVisual } from '../components/AssetVisual'
 import './AboutShared.css'
 import './TopicsSection.css'
 
-const topicIcons = {shield: ShieldCheck, users: Users, house: House, graduation: GraduationCap, health: HeartPulse, leaf: Leaf,} satisfies Record<TopicIconKey, typeof ShieldCheck>
+const topicIcons = {
+  shield: ShieldCheck,
+  users: Users,
+  house: House,
+  graduation: GraduationCap,
+  health: HeartPulse,
+  leaf: Leaf,
+} satisfies Record<TopicIconKey, typeof ShieldCheck>
 
 export function TopicsSection() {
   const { introduction, themes } = aboutContent
@@ -18,10 +25,19 @@ export function TopicsSection() {
   return (
     <section aria-labelledby="about-title" className="about-topics relative pt-12 pb-20 sm:pt-16">
       <div className="about-page-width relative z-10">
-        <h1 id="about-title" className="font-display text-5xl leading-none text-primary sm:text-6xl">{introduction.title}</h1>
-        <p className="mt-5 max-w-md font-sans text-base leading-snug text-primary">{introduction.description}</p>
-        <p className="mt-3 max-w-xl font-display text-xl uppercase leading-tight text-white sm:text-2xl">
-          <span className="bg-primary px-1 py-0.5 box-decoration-clone">{introduction.emphasis}</span>
+        <h1
+          id="about-title"
+          className="font-display text-primary text-5xl leading-none sm:text-6xl"
+        >
+          {introduction.title}
+        </h1>
+        <p className="text-primary mt-5 max-w-md font-sans text-base leading-snug">
+          {introduction.description}
+        </p>
+        <p className="font-display mt-3 max-w-xl text-xl leading-tight text-white uppercase sm:text-2xl">
+          <span className="bg-primary box-decoration-clone px-1 py-0.5">
+            {introduction.emphasis}
+          </span>
         </p>
       </div>
 
@@ -36,28 +52,53 @@ export function TopicsSection() {
             const active = selectedId === topic.id
             const Icon = topicIcons[topic.iconKey]
             return (
-              <button key={topic.id} type="button" aria-pressed={active} aria-label={`Selecionar tema: ${topic.title}`} onClick={() => setSelectedId(topic.id)} className={`about-topic-card ${active ? 'about-topic-card--active' : ''}`} style={{ backgroundColor: topic.accentColor }}>
-                <AssetVisual src={topic.imageUrl} alt="" className="about-topic-card__picture" fallback={<div className="h-full w-full bg-linear-to-br from-black/10 via-transparent to-black/40" />}/>
+              <button
+                key={topic.id}
+                type="button"
+                aria-pressed={active}
+                aria-label={`Selecionar tema: ${topic.title}`}
+                onClick={() => setSelectedId(topic.id)}
+                className={`about-topic-card ${active ? 'about-topic-card--active' : ''}`}
+                style={{ backgroundColor: topic.accentColor }}
+              >
+                <AssetVisual
+                  src={topic.imageUrl}
+                  alt=""
+                  className="about-topic-card__picture"
+                  fallback={
+                    <div className="h-full w-full bg-linear-to-br from-black/10 via-transparent to-black/40" />
+                  }
+                />
                 <span className="about-topic-card__darken" aria-hidden="true" />
                 <span className="about-topic-card__collapsed-icon" aria-hidden="true">
-                  {topic.iconUrl ? <img src={topic.iconUrl} alt="" /> : <Icon size={21} strokeWidth={2.8} />}
+                  {topic.iconUrl ? (
+                    <img src={topic.iconUrl} alt="" />
+                  ) : (
+                    <Icon size={21} strokeWidth={2.8} />
+                  )}
                 </span>
                 <span className="about-topic-card__details" aria-hidden={!active}>
-                  <span className="about-topic-card__large-icon" style={{ color: topic.accentColor }} aria-hidden="true">
+                  <span
+                    className="about-topic-card__large-icon"
+                    style={{ color: topic.accentColor }}
+                    aria-hidden="true"
+                  >
                     {topic.iconUrl ? (
-                        <span
+                      <span
                         className="about-topic-card__large-icon-mask"
                         style={{
-                            maskImage: `url("${topic.iconUrl}")`,
-                            WebkitMaskImage: `url("${topic.iconUrl}")`,
+                          maskImage: `url("${topic.iconUrl}")`,
+                          WebkitMaskImage: `url("${topic.iconUrl}")`,
                         }}
-                        />
+                      />
                     ) : (
-                        <Icon size={63} strokeWidth={2.2} />
+                      <Icon size={63} strokeWidth={2.2} />
                     )}
-                    </span>
+                  </span>
                   <span className="about-topic-card__description">
-                    <strong className="font-display text-3xl leading-none sm:text-4xl lg:text-8xl">{topic.title}</strong>
+                    <strong className="font-display text-3xl leading-none sm:text-4xl lg:text-8xl">
+                      {topic.title}
+                    </strong>
                     <span className="mt-2 block leading-snug">{topic.description}</span>
                   </span>
                 </span>

@@ -13,10 +13,14 @@ export function HistorySection() {
           src={history.imageUrl}
           alt=""
           className="absolute inset-0"
-          fallback={<div className="h-full w-full bg-linear-to-r from-[#0079ab] via-home-documents to-[#025676]" />}
+          fallback={
+            <div className="via-home-documents h-full w-full bg-linear-to-r from-[#0079ab] to-[#025676]" />
+          }
         />
         <div className="about-page-width relative z-10 py-7">
-          <h2 className="max-w-lg font-display text-3xl leading-snug text-white sm:text-4xl">{history.banner}</h2>
+          <h2 className="font-display max-w-lg text-3xl leading-snug text-white sm:text-4xl">
+            {history.banner}
+          </h2>
         </div>
       </div>
       <div className="about-history__content about-page-width mt-12">
@@ -25,8 +29,10 @@ export function HistorySection() {
           <p className="mt-5 leading-relaxed">{history.paragraph}</p>
         </div>
         <div className="flex flex-col justify-center gap-4">
-          <p className="max-w-xs text-sm font-medium text-accent">{history.callout}</p>
-          <AboutAction href={history.href} arrow className="max-w-75">{history.button}</AboutAction>
+          <p className="text-accent max-w-xs text-sm font-medium">{history.callout}</p>
+          <AboutAction href={history.href} arrow className="max-w-75">
+            {history.button}
+          </AboutAction>
         </div>
       </div>
     </section>

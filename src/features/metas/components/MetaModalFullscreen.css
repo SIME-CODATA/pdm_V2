@@ -1,0 +1,16 @@
+/* Modal legado do PDM: ocupa toda a viewport, sem alterar as classes Tailwind originais. */
+.pdm-meta-legacy__fullscreen{position:fixed;inset:0;z-index:9999;overflow-y:auto;overscroll-behavior:contain;background:#fff;color:#202124;scrollbar-width:thin}
+.pdm-meta-legacy__content{min-height:100%;width:100%;background:#fff}
+.pdm-meta-legacy__fullscreen h2,.pdm-meta-legacy__fullscreen h3,.pdm-meta-legacy__fullscreen h4,.pdm-meta-legacy__fullscreen .BebasNeue,.pdm-meta-legacy__fullscreen .font-bebas-bold,.pdm-meta-legacy__fullscreen .font-bebas-book{font-family:'Bebas Neue',var(--font-display),sans-serif}
+.pdm-meta-legacy__fullscreen .roboto-regular,.pdm-meta-legacy__fullscreen .roboto-bold{font-family:Roboto,Arial,sans-serif}
+.pdm-meta-legacy__fullscreen .roboto-bold{font-weight:700}
+.pdm-meta-legacy__fullscreen .fa-solid,.pdm-meta-legacy__fullscreen .fa-regular{font-style:normal;display:inline-flex;align-items:center;justify-content:center}
+.pdm-meta-legacy__fullscreen .fa-arrow-left::before{content:'←'}
+.pdm-meta-legacy__fullscreen .fa-check::before{content:'✓'}
+.pdm-meta-legacy__fullscreen .fa-plus::before{content:'+'}
+.pdm-meta-legacy__fullscreen .fa-minus::before{content:'−'}
+.pdm-meta-legacy__fullscreen .fa-chevron-left::before{content:'‹'}
+.pdm-meta-legacy__fullscreen .fa-chevron-right::before{content:'›'}
+.pdm-meta-legacy__fullscreen .fa-image::before{content:'▧'}
+.pdm-meta-legacy__fullscreen :is(button,[role="button"]):focus-visible{outline:3px solid #0079AB;outline-offset:3px}
+@media(max-width:767px){.pdm-meta-legacy__fullscreen .pdm-meta-legacy__content{min-height:100dvh}}
