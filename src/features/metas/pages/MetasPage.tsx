@@ -4,7 +4,7 @@ import {MapPinned,BarChart3} from 'lucide-react'
 import {useMetas,useMetaMapPayload,useMetaFiltersPayload} from '../hooks/useMetas'
 import {emptyFilters,applyBaseFilters} from '../lib/metas.utils'
 import type {ActiveFilters} from '../lib/metas.utils'
-import {loadTerritories,areaMatches} from '../map/metas.geo'
+import {loadTerritories, codeName, visibleTerritoryKeys} from '../map/metas.geo'
 import type {Bounds} from '../map/metas.geo'
 import {MetaCard} from '../components/MetaCard'
 import {MetaModal} from '../components/MetaModal'
@@ -29,10 +29,13 @@ export function MetasPage(){
  const metas=data?.metas??EMPTY_METAS
  const filtered=useMemo(()=>applyBaseFilters(metas,deferred),[metas,deferred])
  const features=territories.data?.features??EMPTY_FEATURES
+ // Um único cálculo para todo o mapa: central no zoom próximo, áreas
+ // intersectadas na visão ampla. A lista segue a câmera ao terminar o zoom.
+ const visibleAreaKeys=useMemo(()=>visibleTerritoryKeys(features,bounds),[features,bounds])
  const visible=useMemo(()=>filtered.filter(meta=>{
-  if(filters.regional==='nonregionalized') return true
-  return areaMatches(meta,features,bounds)
- }),[filtered,features,bounds,filters.regional])
+  if(!bounds||filters.regional==='nonregionalized')return true
+  return meta.regionalizada&&meta.subprefeituras.some(name=>visibleAreaKeys?.has(codeName(name)))
+ }),[filtered,bounds,visibleAreaKeys,filters.regional])
  const selected=metas.find(m=>m.codigo===selectedCode)??null
  const withTerritories=metas.filter(m=>m.regionalizada&&m.subprefeituras.length).length
  function reset(){setBounds(null);setResetKey(x=>x+1)}
@@ -40,7 +43,7 @@ export function MetasPage(){
   const next = activeCode===code ? null : code
   setActiveCode(next)
   if (next) requestAnimationFrame(()=>{
-   listRef.current?.querySelector<HTMLElement>(`[data-meta-code=\"${next}\"]`)
+   listRef.current?.querySelector<HTMLElement>(`[data-meta-code="${next}"]`)
     ?.scrollIntoView({behavior:'smooth',block:'nearest'})
   })
  }
@@ -51,10 +54,10 @@ export function MetasPage(){
    <div className="metas-page__heading"><h2 id="metas-map-title">{metasContent.mapTitle}</h2><div className="metas-page__switch" role="group" aria-label="Modo de visualização"><button type="button" aria-label="Visualizar mapa" aria-pressed={mode==='map'} onClick={()=>setMode('map')}><MapPinned/></button><button type="button" aria-label="Visualizar resumo" aria-pressed={mode==='stats'} onClick={()=>setMode('stats')}><BarChart3/></button></div></div>
    <div className="metas-page__grid">
     <section className="metas-page__map-panel" aria-label="Mapa e estatísticas">
-     {mode==='map'?<><div className="metas-page__map-shell"><Suspense fallback={<div className="metas-page__map-loading">Carregando mapa…</div>}><MetasMap metas={filtered} features={features} activeCode={activeCode} onBounds={setBounds} onSelect={selectPin} resetKey={resetKey}/></Suspense></div>
-      <div className="metas-page__map-footer"><button type="button" className="metas-page__map-action" onClick={reset}>Ver São Paulo inteira</button><span>{bounds?'Área visível: a listagem acompanha o mapa':'Todas as áreas · selecione o número de uma meta'}</span></div>
-      {territories.data?.source==='reference'&&<p className="metas-page__map-warning">Pins em pontos aproximados das subprefeituras. Sem polígonos oficiais, o filtro espacial por zoom também é aproximado. Adicione o GeoJSON validado do GeoSampa para precisão territorial.</p>}
-      {territories.isError&&<p className="metas-page__map-warning" role="alert">{metasContent.noGeo}</p>}
+     {mode==='map'?<><div className="metas-page__map-shell"><Suspense fallback={<div className="metas-page__map-loading">Carregando mapa…</div>}><MetasMap metas={metas} features={features} activeCode={activeCode} onBounds={setBounds} onSelect={selectPin} resetKey={resetKey}/></Suspense></div>
+      <div className="metas-page__map-footer"><button type="button" className="metas-page__map-action" onClick={reset}>Ver São Paulo inteira</button><span>{bounds ? (bounds.zoom??0)>=11.15 ? 'Zoom próximo: lista da subprefeitura no centro' : 'Área visível: lista das subprefeituras na tela' : 'Todas as áreas · todos os números das metas no mapa'}</span></div>
+      {territories.data?.source==='local'&&<p className="metas-page__map-warning">Pins por subprefeitura, usando os limites territoriais do GeoJSON. Os pontos são referências das áreas, não endereços de obras.</p>}
+      {territories.isError&&<p className="metas-page__map-warning" role="alert">{territories.error?.message??metasContent.noGeo}</p>}
      </>:<div className="metas-page__stats"><h3 className="font-display">Visão geral</h3><div><strong>{metas.length}</strong> metas no índice</div><div><strong>{metas.filter(m=>!m.regionalizada).length}</strong> não regionalizáveis</div><div><strong>{withTerritories}</strong> com território informado</div><div><strong>{metas.filter(m=>m.regionalizada&&!m.subprefeituras.length).length}</strong> regionalizáveis ainda sem território</div><BudgetPanel/></div>}
     </section>
     <aside className="metas-page__sidebar"><MetasFilters metas={metas} value={filters} onChange={setFilters}/><div className="metas-page__list-heading"><span>{visible.length} metas exibidas</span><span>{data?`${data.total} no total`:''}</span></div><div className="metas-page__list" ref={listRef} aria-live="polite">
