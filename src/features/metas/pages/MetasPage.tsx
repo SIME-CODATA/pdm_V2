@@ -9,11 +9,13 @@ import type {Bounds} from '../map/metas.geo'
 import {MetaCard} from '../components/MetaCard'
 import {MetaModal} from '../components/MetaModal'
 import {MetasFilters} from '../components/MetasFilters'
-import {BudgetPanel} from '../components/BudgetPanel'
+import {OverviewPanel} from '../components/OverviewPanel'
+import {NonRegionalMetasSection} from '../components/NonRegionalMetasSection'
 import { metasContent } from '../data/metas.content'
 import type { MetaSummary } from '../api/metas.schemas'
 import type { TerritoryFeature } from '../map/metas.geo'
 import './MetasPage.css'
+import './MetasPresentation.css'
 const EMPTY_METAS: MetaSummary[] = []
 const EMPTY_FEATURES: TerritoryFeature[] = []
 const MetasMap=lazy(()=>import('../map/MetasMap').then(x=>({default:x.MetasMap})))
@@ -37,7 +39,6 @@ export function MetasPage(){
   return meta.regionalizada&&meta.subprefeituras.some(name=>visibleAreaKeys?.has(codeName(name)))
  }),[filtered,bounds,visibleAreaKeys,filters.regional])
  const selected=metas.find(m=>m.codigo===selectedCode)??null
- const withTerritories=metas.filter(m=>m.regionalizada&&m.subprefeituras.length).length
  function reset(){setBounds(null);setResetKey(x=>x+1)}
  function selectPin(code:string){
   const next = activeCode===code ? null : code
@@ -51,20 +52,20 @@ export function MetasPage(){
  return <div className="metas-page">
   <header className="metas-page__header"><h1 className="font-display text-primary">{metasContent.title}</h1><p>{metasContent.description}</p></header>
   <section className="metas-page__workspace" aria-labelledby="metas-map-title">
-   <div className="metas-page__heading"><h2 id="metas-map-title">{metasContent.mapTitle}</h2><div className="metas-page__switch" role="group" aria-label="Modo de visualização"><button type="button" aria-label="Visualizar mapa" aria-pressed={mode==='map'} onClick={()=>setMode('map')}><MapPinned/></button><button type="button" aria-label="Visualizar resumo" aria-pressed={mode==='stats'} onClick={()=>setMode('stats')}><BarChart3/></button></div></div>
-   <div className="metas-page__grid">
+   <div className="metas-page__heading"><h2 id="metas-map-title">{mode === 'map' ? metasContent.mapTitle : 'Visão geral'}</h2><div className="metas-page__toolbar"><div className="metas-page__switch" role="group" aria-label="Modo de visualização"><button type="button" aria-label="Visualizar mapa" aria-pressed={mode==='map'} onClick={()=>setMode('map')}><MapPinned/></button><button type="button" aria-label="Visão geral de metas e orçamento" aria-pressed={mode==='stats'} onClick={()=>setMode('stats')}><BarChart3/></button></div></div></div>
+   {mode === 'map' ? <div className="metas-page__grid">
     <section className="metas-page__map-panel" aria-label="Mapa e estatísticas">
-     {mode==='map'?<><div className="metas-page__map-shell"><Suspense fallback={<div className="metas-page__map-loading">Carregando mapa…</div>}><MetasMap metas={metas} features={features} activeCode={activeCode} onBounds={setBounds} onSelect={selectPin} resetKey={resetKey}/></Suspense></div>
+     <div className="metas-page__map-shell"><Suspense fallback={<div className="metas-page__map-loading">Carregando mapa…</div>}><MetasMap metas={metas} features={features} activeCode={activeCode} onBounds={setBounds} onSelect={selectPin} resetKey={resetKey}/></Suspense></div>
       <div className="metas-page__map-footer"><button type="button" className="metas-page__map-action" onClick={reset}>Ver São Paulo inteira</button><span>{bounds ? (bounds.zoom??0)>=11.15 ? 'Zoom próximo: lista da subprefeitura no centro' : 'Área visível: lista das subprefeituras na tela' : 'Todas as áreas · todos os números das metas no mapa'}</span></div>
       {territories.data?.source==='local'&&<p className="metas-page__map-warning">Pins por subprefeitura, usando os limites territoriais do GeoJSON. Os pontos são referências das áreas, não endereços de obras.</p>}
       {territories.isError&&<p className="metas-page__map-warning" role="alert">{territories.error?.message??metasContent.noGeo}</p>}
-     </>:<div className="metas-page__stats"><h3 className="font-display">Visão geral</h3><div><strong>{metas.length}</strong> metas no índice</div><div><strong>{metas.filter(m=>!m.regionalizada).length}</strong> não regionalizáveis</div><div><strong>{withTerritories}</strong> com território informado</div><div><strong>{metas.filter(m=>m.regionalizada&&!m.subprefeituras.length).length}</strong> regionalizáveis ainda sem território</div><BudgetPanel/></div>}
     </section>
     <aside className="metas-page__sidebar"><MetasFilters metas={metas} value={filters} onChange={setFilters}/><div className="metas-page__list-heading"><span>{visible.length} metas exibidas</span><span>{data?`${data.total} no total`:''}</span></div><div className="metas-page__list" ref={listRef} aria-live="polite">
      {isPending?<p className="metas-page__feedback">Consultando nova API…</p>:error?<div className="metas-page__feedback" role="alert"><p>{error.message}</p><button onClick={()=>void refetch()} type="button">Tentar novamente</button></div>:visible.length?visible.map(meta=><MetaCard key={meta.codigo} meta={meta} selected={activeCode===meta.codigo} onOpen={openMeta}/>):<p className="metas-page__feedback">{metasContent.noResults}</p>}
     </div></aside>
-   </div>
+   </div> : <OverviewPanel metas={metas} total={data?.total ?? metas.length} />}
   </section>
+  {mode === 'map' && <NonRegionalMetasSection metas={metas} onOpen={openMeta} />}
   <MetaModal summary={selected} onClose={()=>setSelectedCode(null)}/>
  </div>
 }
