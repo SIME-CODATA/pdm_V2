@@ -12,12 +12,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/pdm-api': {
+        '/pdm-api': {
         target: 'https://projetos.codata.prefeitura.sp.gov.br',
         changeOrigin: true,
         secure: true,
-        rewrite: (p) => p.replace(/^\/pdm-api/, ''),
-      },
+        rewrite: (path) => path.replace(/^\/pdm-api/, ''),
+        },
     },
-  },
+ },
 })

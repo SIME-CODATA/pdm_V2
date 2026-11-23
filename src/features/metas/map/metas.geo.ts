@@ -1,138 +1,133 @@
+/** Geometrias públicas do CMS. Não gera posições artificiais de metas. */
 import type { MetaSummary } from '../api/metas.schemas'
 import { normalizar } from '../lib/metas.utils'
 
-export type Coord = [number, number]
-export interface Bounds {
-  west: number; south: number; east: number; north: number
-  zoom?: number
-  center?: Coord
-}
-export interface MapGeometry {
-  type: 'Polygon' | 'MultiPolygon'
-  coordinates: number[][][] | number[][][][]
-}
+export type Position = [number, number] // [longitude, latitude], EPSG:4326
+export type MapPolygon = { type: 'Polygon'; coordinates: number[][][] } |
+  { type: 'MultiPolygon'; coordinates: number[][][][] }
+export type MapPoint = { type: 'Point'; coordinates: number[] } |
+  { type: 'MultiPoint'; coordinates: number[][] }
 export interface TerritoryFeature {
   type: 'Feature'
-  geometry: MapGeometry
+  geometry: MapPolygon
   properties: Record<string, unknown>
 }
-export interface TerritoryData {
-  type: 'FeatureCollection'
-  features: TerritoryFeature[]
-  source: 'api' | 'local' | 'reference'
+export interface TerritoryCollection { type: 'FeatureCollection'; features: TerritoryFeature[] }
+export interface PublishedPoint {
+  id: string
+  code: string
+  number: string
+  actionCode: string
+  position: Position
+  color: string
+  axis: string
+}
+export interface GeographicBounds { west: number; south: number; east: number; north: number }
+
+// Nunca entregar Infinity, NaN ou limites degenerados ao fitBounds do MapLibre.
+export function validBounds(bounds: GeographicBounds | null | undefined): bounds is GeographicBounds {
+  return !!bounds &&
+    [bounds.west, bounds.south, bounds.east, bounds.north].every(Number.isFinite) &&
+    bounds.west >= -180 && bounds.east <= 180 &&
+    bounds.south >= -90 && bounds.north <= 90 &&
+    bounds.west < bounds.east && bounds.south < bounds.north
 }
 
-// Enquadramento geográfico amplo: não equivale a um polígono administrativo.
-export const SAO_PAULO_OVERVIEW: Bounds = { west: -46.84, south: -24.03, east: -46.35, north: -23.34 }
-export const SAO_PAULO_ALLOWED: Bounds = { west: -46.91, south: -24.09, east: -46.29, north: -23.30 }
+const obj = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v)
+const str = (v: unknown) => typeof v === 'string' || typeof v === 'number' ? String(v).trim() : ''
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value)
-
-function hasGeometry(value: unknown): value is TerritoryFeature {
-  return isRecord(value) && value.type === 'Feature' && isRecord(value.geometry) &&
-    (value.geometry.type === 'Polygon' || value.geometry.type === 'MultiPolygon') &&
-    Array.isArray(value.geometry.coordinates) && isRecord(value.properties)
+const territoryAliases: Record<string, string> = {
+  perusanhanguera: 'perus', casaverdecachoeirinha: 'casaverde',
+  casaverdelimaocachoeirinha: 'casaverde', saomiguelpaulista: 'saomiguel',
+  freguesiadoobrasilandia: 'freguesiabrasilandia',
+  aricanduvaformosacarrao: 'aricanduva', vilamariavilaguilherme: 'vilamaria',
+  jacanatremembe: 'jacana', piritubajaragua: 'pirituba',
+  santanatucuruvi: 'santana',
 }
-
-export function asFeatures(value: unknown): TerritoryFeature[] {
-  if (isRecord(value) && value.type === 'FeatureCollection' && Array.isArray(value.features)) {
-    return value.features.filter(hasGeometry)
+export function territoryKey(name: string) {
+  const key = normalizar(name)
+  return territoryAliases[key] ?? key
+}
+export function territoryName(feature: TerritoryFeature): string {
+  for (const key of ['nome', 'name', 'nm_subpref', 'nm_subprefeitura', 'nome_subprefeitura', 'ds_subpref', 'ds_nome', 'subprefeitura', 'Subprefeitura', 'NOME', 'NAME']) {
+    const value = str(feature.properties[key]); if (value) return value
   }
-  if (isRecord(value)) for (const key of ['data', 'geojson', 'subprefeituras', 'territorios', 'geometrias', 'mapa']) {
-    const result = asFeatures(value[key])
+  return ''
+}
+const validCoordinate = (position: number[]): position is Position =>
+  position.length >= 2 && Number.isFinite(position[0]) && Number.isFinite(position[1]) &&
+  position[0] >= -46.95 && position[0] <= -46.25 &&
+  position[1] >= -24.15 && position[1] <= -23.25
+
+function polygonFeatures(raw: unknown, depth = 0): TerritoryFeature[] {
+  if (depth > 5 || !obj(raw)) return []
+  if (raw.type === 'FeatureCollection' && Array.isArray(raw.features)) {
+    return raw.features.flatMap((f): TerritoryFeature[] => {
+      if (!obj(f) || f.type !== 'Feature' || !obj(f.geometry) ||
+        !['Polygon', 'MultiPolygon'].includes(String(f.geometry.type)) ||
+        !Array.isArray(f.geometry.coordinates)) return []
+      return [{ type: 'Feature', geometry: f.geometry as unknown as MapPolygon,
+        properties: obj(f.properties) ? f.properties : {} }]
+    })
+  }
+  if (raw.type === 'Feature' && obj(raw.geometry) &&
+    (raw.geometry.type === 'Polygon' || raw.geometry.type === 'MultiPolygon')) {
+    return [{ type: 'Feature', geometry: raw.geometry as unknown as MapPolygon,
+      properties: obj(raw.properties) ? raw.properties : {} }]
+  }
+  for (const key of ['data', 'geojson', 'camada', 'camadas', 'subprefeituras', 'territorios', 'geometrias', 'mapa', 'mascara', 'mask']) {
+    const result = polygonFeatures(raw[key], depth + 1)
     if (result.length) return result
   }
   return []
 }
-
-export function territoryName(feature: TerritoryFeature): string {
-  for (const key of ['nome', 'name', 'nm_subpref', 'nm_subprefeitura', 'ds_nome', 'subprefeitura', 'NOME', 'NAME']) {
-    const value = feature.properties[key]
-    if (typeof value === 'string' && value.trim()) return value
+function polygonRings(g: MapPolygon): number[][][][] {
+  return g.type === 'Polygon' ? [g.coordinates] : g.coordinates
+}
+export function getTerritories(raw: unknown): TerritoryCollection {
+  const found = polygonFeatures(raw)
+  const unique = new Map<string, TerritoryFeature>()
+  for (const feature of found) {
+    const key = territoryKey(territoryName(feature))
+    const polygons = polygonRings(feature.geometry)
+    // Array.every() em uma lista vazia retorna true. Por isso exigimos anéis reais.
+    const hasValidRings = polygons.length > 0 && polygons.every(polygon =>
+      polygon.length > 0 && polygon.every(ring =>
+        Array.isArray(ring) && ring.length >= 4 &&
+        ring.every(position => Array.isArray(position) && validCoordinate(position))))
+    if (!key || !hasValidRings || !validBounds(featureBounds(feature))) continue
+    unique.set(key, { ...feature, properties: { ...feature.properties, nome: territoryName(feature), pdmKey: key } })
   }
-  return ''
+  return { type: 'FeatureCollection', features: [...unique.values()] }
 }
-
-// Chaves canônicas compartilhadas entre o GeoJSON da Prefeitura e a API SMAE.
-const aliases: Record<string, string> = {
-  perusanhanguera: 'perus',
-  casaverdecachoeirinha: 'casaverde',
-  casaverdelimaocachoeirinha: 'casaverde',
-  saomiguelpaulista: 'saomiguel',
-  freguesiabrasilandia: 'freguesiabrasilandia',
-  freguesiadoobrasilandia: 'freguesiabrasilandia',
-  aricanduvaformosacarrao: 'aricanduva',
-  vilamariavilaguilherme: 'vilamaria',
-  jacanatremembe: 'jacana',
-  piritubajaragua: 'pirituba',
-  santanatucuruvi: 'santana',
-  capeladosocorro: 'capeladosocorro',
-  mboimirim: 'mboimirim',
+export function asPolygonCollection(raw: unknown): TerritoryCollection {
+  return { type: 'FeatureCollection', features: polygonFeatures(raw) }
 }
-export function codeName(name: string): string {
-  const key = normalizar(name)
-  return aliases[key] ?? key
-}
-export function matchesTerritory(a: string, b: string): boolean { return codeName(a) === codeName(b) }
-export function featureForName(features: TerritoryFeature[], name: string): TerritoryFeature | undefined {
-  return features.find(feature => matchesTerritory(territoryName(feature), name))
-}
-
-function polygons(feature: TerritoryFeature): number[][][][] {
-  return feature.geometry.type === 'Polygon'
-    ? [feature.geometry.coordinates as number[][][]]
-    : feature.geometry.coordinates as number[][][][]
-}
-function allPoints(feature: TerritoryFeature): Coord[] {
-  return polygons(feature).flatMap(polygon => polygon.flatMap(ring => ring as Coord[]))
-}
-const boxes = new WeakMap<TerritoryFeature, Bounds>()
-export function bbox(feature: TerritoryFeature): Bounds {
-  const cached = boxes.get(feature)
-  if (cached) return cached
-  const box: Bounds = { west: Infinity, south: Infinity, east: -Infinity, north: -Infinity }
-  for (const [lng, lat] of allPoints(feature)) {
-    box.west = Math.min(box.west, lng)
-    box.east = Math.max(box.east, lng)
-    box.south = Math.min(box.south, lat)
-    box.north = Math.max(box.north, lat)
+export function featureBounds(feature: TerritoryFeature): GeographicBounds {
+  const box = { west: Infinity, south: Infinity, east: -Infinity, north: -Infinity }
+  for (const polygon of polygonRings(feature.geometry)) {
+    for (const ring of polygon) for (const point of ring) {
+      if (point.length < 2) continue
+      const [lng, lat] = point
+      if (!Number.isFinite(lng) || !Number.isFinite(lat)) continue
+      box.west = Math.min(box.west, lng)
+      box.east = Math.max(box.east, lng)
+      box.south = Math.min(box.south, lat)
+      box.north = Math.max(box.north, lat)
+    }
   }
-  boxes.set(feature, box)
   return box
 }
-export function intersects(a: Bounds, b: Bounds): boolean {
-  return a.west <= b.east && a.east >= b.west && a.south <= b.north && a.north >= b.south
-}
-export function validTerritory(feature: TerritoryFeature): boolean {
-  if (!territoryName(feature)) return false
-  const points = allPoints(feature)
-  if (points.length < 4) return false
-  // Rejeita coordenadas UTM (EPSG:31983) colocadas por engano no MapLibre.
-  return points.every(([lng, lat]) => Number.isFinite(lng) && Number.isFinite(lat) &&
-    lng >= SAO_PAULO_ALLOWED.west && lng <= SAO_PAULO_ALLOWED.east &&
-    lat >= SAO_PAULO_ALLOWED.south && lat <= SAO_PAULO_ALLOWED.north)
-}
-
-async function getJson(url: string, signal?: AbortSignal): Promise<unknown> {
-  const response = await fetch(url, { signal, headers: { Accept: 'application/json' } })
-  if (!response.ok) throw new Error(`GeoJSON de subprefeituras não encontrado: ${url} (HTTP ${response.status})`)
-  return await response.json() as unknown
-}
-
-export async function loadTerritories(_mapPayload: unknown, signal?: AbortSignal): Promise<TerritoryData> {
-  // Fonte única, com os 32 polígonos oficiais previamente convertidos para EPSG:4326.
-  const raw = await getJson(`${import.meta.env.BASE_URL}data/subprefeituras.geojson`, signal)
-  const features = asFeatures(raw)
-  if (features.length !== 32 || features.some(feature => !validTerritory(feature))) {
-    throw new Error('GeoJSON inválido: são necessárias 32 subprefeituras com coordenadas EPSG:4326. Não use o arquivo UTM original.')
+export function allBounds(features: TerritoryFeature[]): GeographicBounds | null {
+  const boxes = features.map(featureBounds).filter(validBounds)
+  if (!boxes.length) return null
+  const merged = {
+    west: Math.min(...boxes.map(b => b.west)), south: Math.min(...boxes.map(b => b.south)),
+    east: Math.max(...boxes.map(b => b.east)), north: Math.max(...boxes.map(b => b.north)),
   }
-  const unique = new Set(features.map(feature => codeName(territoryName(feature))))
-  if (unique.size !== 32) throw new Error('GeoJSON contém subprefeituras repetidas ou nomes não identificados.')
-  return { type: 'FeatureCollection', features, source: 'local' }
+  return validBounds(merged) ? merged : null
 }
-
-function pointInRing([lng, lat]: Coord, ring: number[][]): boolean {
+function pointInsideRing([lng, lat]: Position, ring: number[][]): boolean {
   let inside = false
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const a = ring[i], b = ring[j]
@@ -141,179 +136,68 @@ function pointInRing([lng, lat]: Coord, ring: number[][]): boolean {
   }
   return inside
 }
-function inPolygon(point: Coord, rings: number[][][]): boolean {
-  return !!rings[0]?.length && pointInRing(point, rings[0]) && !rings.slice(1).some(ring => pointInRing(point, ring))
+export function inTerritory(point: Position, feature: TerritoryFeature): boolean {
+  return polygonRings(feature.geometry).some(rings =>
+    !!rings[0] && pointInsideRing(point, rings[0]) &&
+    !rings.slice(1).some(hole => pointInsideRing(point, hole)))
 }
-export function pointInFeature(point: Coord, feature: TerritoryFeature): boolean {
-  return polygons(feature).some(rings => inPolygon(point, rings))
+export function territoryForPoint(point: Position, features: TerritoryFeature[]): string {
+  const found = features.find(f => inTerritory(point, f))
+  return found ? territoryKey(territoryName(found)) : ''
 }
 
-function segmentTouchesBounds(a: number[], b: number[], box: Bounds): boolean {
-  const dx = b[0] - a[0], dy = b[1] - a[1]
-  const p = [-dx, dx, -dy, dy]
-  const q = [a[0] - box.west, box.east - a[0], a[1] - box.south, box.north - a[1]]
-  let t0 = 0, t1 = 1
-  for (let i = 0; i < 4; i++) {
-    if (p[i] === 0) { if (q[i] < 0) return false; continue }
-    const r = q[i] / p[i]
-    if (p[i] < 0) t0 = Math.max(t0, r)
-    else t1 = Math.min(t1, r)
-    if (t0 > t1) return false
+function metaCode(raw: unknown): string {
+  const text = str(raw)
+  // Pode chegar como '01', 1, '01.00.02' ou 'meta_01'.
+  const match = text.match(/^(?:meta[_ -]?)?(\d{1,3})(?:[.]\d+)*$/i)
+  return match ? String(Number(match[1])).padStart(2, '0') : ''
+}
+function published(props: Record<string, unknown>): boolean {
+  // A API pública já deve filtrar dados não autorizados. Esta é defesa adicional.
+  for (const name of ['publicavel', 'publicado', 'publica', 'fonte_publicada', 'localizacao_publicavel',
+    'localizacao_autorizada', 'pode_publicar']) {
+    if (!(name in props)) continue
+    const value = props[name]
+    if (value === false || value === 0 || ['nao', 'não', 'false', '0'].includes(str(value).toLowerCase())) return false
   }
   return true
 }
-export function intersectsViewport(feature: TerritoryFeature, viewport: Bounds): boolean {
-  if (!intersects(bbox(feature), viewport)) return false
-  const corners: Coord[] = [
-    [viewport.west, viewport.south], [viewport.west, viewport.north],
-    [viewport.east, viewport.south], [viewport.east, viewport.north],
-  ]
-  if (corners.some(corner => pointInFeature(corner, feature))) return true
-  for (const polygon of polygons(feature)) for (const ring of polygon) {
-    for (let i = 0; i < ring.length - 1; i++) {
-      const p = ring[i], q = ring[i + 1]
-      if ((p[0] >= viewport.west && p[0] <= viewport.east && p[1] >= viewport.south && p[1] <= viewport.north) ||
-        segmentTouchesBounds(p, q, viewport)) return true
-    }
-  }
-  return false
-}
-
-/** Subprefeitura central no zoom próximo; interseção territorial nos demais. */
-export function visibleTerritoryKeys(features: TerritoryFeature[], view: Bounds | null): Set<string> | null {
-  if (!view) return null
-  if ((view.zoom ?? 0) >= 11.15) {
-    const center: Coord = view.center ?? [(view.west + view.east) / 2, (view.south + view.north) / 2]
-    const central = features.find(feature => pointInFeature(center, feature))
-    if (central) return new Set([codeName(territoryName(central))])
-  }
-  return new Set(features.filter(feature => intersectsViewport(feature, view))
-    .map(feature => codeName(territoryName(feature))))
-}
-
-export function areaMatches(meta: MetaSummary, territories: TerritoryFeature[], visible: Bounds | null): boolean {
-  if (!visible) return true
-  if (!meta.regionalizada) return false
-  return meta.subprefeituras.some(name => {
-    const feature = featureForName(territories, name)
-    return !!feature && intersectsViewport(feature, visible)
-  })
-}
-
-// Âncora territorial fixa. Para territórios muito extensos ao sul, privilegia
-// a faixa norte do polígono (área próxima à malha urbana). Não é endereço de obra.
-const representativeCache = new WeakMap<TerritoryFeature, Coord | null>()
-export function representativePosition(feature: TerritoryFeature): Coord | null {
-  if (representativeCache.has(feature)) return representativeCache.get(feature) ?? null
-  if (!validTerritory(feature)) return null
-  const box = bbox(feature)
-  const height = box.north - box.south
-  const target: Coord = [
-    (box.west + box.east) / 2,
-    height > 0.14 && box.south < -23.70
-      ? box.north - height * 0.24
-      : (box.south + box.north) / 2,
-  ]
-  let best: Coord | null = pointInFeature(target, feature) ? target : null
-  if (!best) {
-    let bestDistance = Infinity
-    for (const n of [16, 32, 64]) {
-      for (let j = 1; j < n; j++) for (let i = 1; i < n; i++) {
-        const point: Coord = [
-          box.west + (i / n) * (box.east - box.west),
-          box.south + (j / n) * height,
-        ]
-        if (!pointInFeature(point, feature)) continue
-        const distance = (point[0] - target[0]) ** 2 + (point[1] - target[1]) ** 2
-        if (distance < bestDistance) { best = point; bestDistance = distance }
+export function getPublishedPoints(raw: unknown, metas: MetaSummary[]): PublishedPoint[] {
+  const byCode = new Map(metas.map(m => [metaCode(m.codigo), m]))
+  const found = new Map<string, PublishedPoint>()
+  // Busca SOMENTE coleções GeoJSON retornadas por endpoints públicos;
+  // nunca vasculha abas_excel / fontes operacionais privadas.
+  function visit(value: unknown, inheritedCode = '', level = 0): void {
+    if (level > 6 || !obj(value) || !published(value)) return
+    const context = metaCode(value.codigo_meta ?? value.meta_codigo ?? value.metaCode ?? value.codigo) || inheritedCode
+    if (value.type === 'FeatureCollection' && Array.isArray(value.features)) {
+      for (const f of value.features) {
+        if (!obj(f) || f.type !== 'Feature' || !obj(f.geometry)) continue
+        const p = obj(f.properties) ? f.properties : {}
+        if (!published(p)) continue
+        const code = metaCode(p.codigo_meta ?? p.meta_codigo ?? p.meta ?? p.numero_meta ?? p.meta_number ?? p.codigo ?? p.geocodigo) || context
+        const meta = byCode.get(code)
+        if (!meta || !meta.regionalizada) continue
+        const g = f.geometry as unknown as MapPoint
+        if (g.type !== 'Point' && g.type !== 'MultiPoint') continue
+        const positions: number[][] = g.type === 'Point' ? [g.coordinates] : g.coordinates
+        for (const pos of positions) {
+          if (!Array.isArray(pos) || !validCoordinate(pos)) continue
+          const actionCode = str(p.geocodigo ?? p.codigo_acao ?? p.action_code ?? p.codigo ?? f.id)
+          const id = [code, actionCode || 'local', pos[0].toFixed(6), pos[1].toFixed(6)].join(':')
+          found.set(id, { id, code: meta.codigo, number: meta.numero, actionCode, position: [pos[0], pos[1]],
+            color: meta.eixo.cor_principal || '#0079AB', axis: meta.eixo.nome })
+        }
       }
-      if (best) break
+      return
+    }
+    if (Array.isArray(value.features)) visit({ type: 'FeatureCollection', features: value.features }, context, level + 1)
+    for (const key of ['mapa', 'geojson', 'data', 'pontos', 'metas', 'items', 'localizacoes', 'resultados']) {
+      const nested = value[key]
+      if (Array.isArray(nested)) for (const item of nested) visit(item, context, level + 1)
+      else if (nested) visit(nested, context, level + 1)
     }
   }
-  representativeCache.set(feature, best)
-  return best
-}
-
-export interface MetaPin {
-  id: string // subprefeitura + codigo, um pin por associação territorial
-  code: string
-  number: string
-  name: string
-  position: Coord
-  color: string
-}
-
-/**
- * Distribuição cartográfica estável, SEM coordenadas de obras: cada número é
- * uma referência de meta na subprefeitura. Pontos nunca dependem de zoom,
- * filtros ou seleção, e sempre ficam dentro do polígono oficial.
- */
-const positionCache = new WeakMap<TerritoryFeature, Map<number, Coord[]>>()
-export function positionsInTerritory(feature: TerritoryFeature, count: number): Coord[] {
-  if (count <= 0) return []
-  let cachedByCount = positionCache.get(feature)
-  if (!cachedByCount) { cachedByCount = new Map(); positionCache.set(feature, cachedByCount) }
-  const cached = cachedByCount.get(count)
-  if (cached) return cached
-
-  const anchor = representativePosition(feature)
-  if (!anchor) return []
-  const bounds = bbox(feature)
-  const narrowSide = Math.min(bounds.east - bounds.west, bounds.north - bounds.south)
-  // Até ~2 km de deslocamento do ponto de referência; áreas pequenas usam
-  // deslocamento menor. A geometria real é validada para CADA marcador.
-  const step = Math.min(0.0024, (narrowSide * 0.28) / Math.max(2, Math.sqrt(count)))
-  const result: Coord[] = [anchor]
-  const goldenAngle = Math.PI * (3 - Math.sqrt(5))
-  const maxAttempts = Math.max(count * 120, 250)
-  for (let i = 1; result.length < count && i < maxAttempts; i++) {
-    const radius = step * Math.sqrt(i)
-    const angle = goldenAngle * i
-    const candidate: Coord = [
-      anchor[0] + Math.cos(angle) * radius,
-      anchor[1] + Math.sin(angle) * radius,
-    ]
-    if (pointInFeature(candidate, feature)) result.push(candidate)
-  }
-  // Se o ponto de referência estiver num segmento minúsculo do polígono,
-  // preservamos todos os números, mesmo que compartilhem a mesma âncora.
-  while (result.length < count) result.push(anchor)
-  cachedByCount.set(count, result)
-  return result
-}
-
-/** Todos os números, inclusive meta repetida em subprefeituras diferentes. */
-export function buildMetaPins(metas: MetaSummary[], features: TerritoryFeature[]): MetaPin[] {
-  const byTerritory = new Map<string, MetaSummary[]>()
-  for (const meta of metas) {
-    if (!meta.regionalizada) continue
-    for (const key of new Set(meta.subprefeituras.map(codeName))) {
-      const list = byTerritory.get(key) ?? []
-      if (!list.some(item => item.codigo === meta.codigo)) list.push(meta)
-      byTerritory.set(key, list)
-    }
-  }
-
-  const pins: MetaPin[] = []
-  for (const feature of features) {
-    const name = territoryName(feature)
-    const options = byTerritory.get(codeName(name))
-    if (!options?.length) continue
-    options.sort((a, b) => Number(a.numero) - Number(b.numero))
-    const positions = positionsInTerritory(feature, options.length)
-    for (let i = 0; i < options.length; i++) {
-      const meta = options[i]
-      const position = positions[i]
-      if (!position) continue
-      pins.push({
-        id: `${codeName(name)}:${meta.codigo}`,
-        code: meta.codigo,
-        number: meta.numero,
-        name,
-        position,
-        color: meta.eixo.cor_principal ?? '#0079AB',
-      })
-    }
-  }
-  return pins
+  visit(raw)
+  return [...found.values()]
 }
