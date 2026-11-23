@@ -1,72 +1,203 @@
-import { lazy, Suspense, useDeferredValue, useMemo, useRef, useState } from 'react'
-import {useQuery} from '@tanstack/react-query'
-import {MapPinned,BarChart3} from 'lucide-react'
-import {useMetas,useMetaMapPayload,useMetaFiltersPayload} from '../hooks/useMetas'
-import {emptyFilters,applyBaseFilters} from '../lib/metas.utils'
-import type {ActiveFilters} from '../lib/metas.utils'
-import {loadTerritories, codeName, visibleTerritoryKeys} from '../map/metas.geo'
-import type {Bounds} from '../map/metas.geo'
-import {MetaCard} from '../components/MetaCard'
-import {MetaModal} from '../components/MetaModal'
-import {MetasFilters} from '../components/MetasFilters'
-import {OverviewPanel} from '../components/OverviewPanel'
-import {NonRegionalMetasSection} from '../components/NonRegionalMetasSection'
-import { metasContent } from '../data/metas.content'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { getMascaraGeojson, getMetaPublishedGeojson, getSubprefeiturasGeojson } from '../api/metas.repository'
+import { useMetas, useMetaMapPayload } from '../hooks/useMetas'
+import { getPublishedPoints, getTerritories, territoryKey, territoryName, territoryForPoint } from '../map/metas.geo'
+import { searchMatches, sameName } from '../lib/metas.utils'
 import type { MetaSummary } from '../api/metas.schemas'
-import type { TerritoryFeature } from '../map/metas.geo'
+import { MetaCard } from '../components/MetaCard'
+import { MetaModal } from '../components/MetaModal'
+import { MetasFilters } from '../components/MetasFilters'
+import { OverviewPanel } from '../components/OverviewPanel'
+import { metasContent } from '../data/metas.content'
 import './MetasPage.css'
 import './MetasPresentation.css'
-const EMPTY_METAS: MetaSummary[] = []
-const EMPTY_FEATURES: TerritoryFeature[] = []
-const MetasMap=lazy(()=>import('../map/MetasMap').then(x=>({default:x.MetasMap})))
-export function MetasPage(){
- const [filters,setFilters]=useState<ActiveFilters>({...emptyFilters}),[selectedCode,setSelectedCode]=useState<string|null>(null),[mode,setMode]=useState<'map'|'stats'>('map')
- const [bounds,setBounds]=useState<Bounds|null>(null),[resetKey,setResetKey]=useState(0)
- const [activeCode,setActiveCode]=useState<string|null>(null)
- const listRef=useRef<HTMLDivElement>(null)
- const deferred=useDeferredValue(filters)
- const {data,isPending,error,refetch}=useMetas()
- const mapPayload=useMetaMapPayload();useMetaFiltersPayload() // cache separado para validar esquema real do endpoint
- const territories=useQuery({queryKey:['pdm-v2','territories',mapPayload.data],queryFn:({signal})=>loadTerritories(mapPayload.data,signal),staleTime:600_000,retry:0})
- const metas=data?.metas??EMPTY_METAS
- const filtered=useMemo(()=>applyBaseFilters(metas,deferred),[metas,deferred])
- const features=territories.data?.features??EMPTY_FEATURES
- // Um único cálculo para todo o mapa: central no zoom próximo, áreas
- // intersectadas na visão ampla. A lista segue a câmera ao terminar o zoom.
- const visibleAreaKeys=useMemo(()=>visibleTerritoryKeys(features,bounds),[features,bounds])
- const visible=useMemo(()=>filtered.filter(meta=>{
-  if(!bounds||filters.regional==='nonregionalized')return true
-  return meta.regionalizada&&meta.subprefeituras.some(name=>visibleAreaKeys?.has(codeName(name)))
- }),[filtered,bounds,visibleAreaKeys,filters.regional])
- const selected=metas.find(m=>m.codigo===selectedCode)??null
- function reset(){setBounds(null);setResetKey(x=>x+1)}
- function selectPin(code:string){
-  const next = activeCode===code ? null : code
-  setActiveCode(next)
-  if (next) requestAnimationFrame(()=>{
-   listRef.current?.querySelector<HTMLElement>(`[data-meta-code="${next}"]`)
-    ?.scrollIntoView({behavior:'smooth',block:'nearest'})
+import './MetasRework.css'
+
+const MetasMapView = lazy(() =>import('../map/MetasMap').then(module => ({ default: module.MetasMap })))
+const NO_METAS: MetaSummary[] = []
+
+// A rota do mapa geral deve trazer GeoJSON público; se não trouxer, utilizamos
+// SOMENTE endpoints /fontes/geojson, com concorrência controlada e cache de query.
+async function loadPublishedIndividual(metas: MetaSummary[], signal: AbortSignal): Promise<{ raw: unknown[]; errors: number }> {
+  const eligible = metas.filter(meta => meta.regionalizada)
+  const raw: unknown[] = []
+  let index = 0
+  let errors = 0
+  await Promise.all(Array.from({ length: Math.min(4, eligible.length) }, async () => {
+    while (index < eligible.length && !signal.aborted) {
+      const meta = eligible[index++]
+      try {
+        const payload = await getMetaPublishedGeojson(meta.codigo, signal)
+        raw.push({ codigo: meta.codigo, mapa: payload })
+      } catch (error) {
+        if (signal.aborted) return
+        errors++
+        // Um endpoint individual indisponível não impede a exibição dos demais.
+        console.warn('GeoJSON público indisponível para a meta', meta.codigo, error)
+      }
+    }
+  }))
+  return { raw, errors }
+}
+
+export function MetasPage() {
+  const [axis, setAxis] = useState('')
+  const [search, setSearch] = useState('')
+  const [territory, setTerritory] = useState<string | null>(null)
+  const [selectedCode, setSelectedCode] = useState<string | null>(null)
+  const [activeCode, setActiveCode] = useState<string | null>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+
+  const { data, error, isPending, refetch } = useMetas()
+  const mapPayload = useMetaMapPayload()
+  const subprefPayload = useQuery({
+    queryKey: ['pdm-v2', 'geo', 'subprefeituras', 'api'],
+    queryFn: ({ signal }) => getSubprefeiturasGeojson(signal),
+    staleTime: 30 * 60_000, retry: 1,
   })
- }
- function openMeta(code:string){setActiveCode(code);setSelectedCode(code)}
- return <div className="metas-page">
-  <header className="metas-page__header"><h1 className="font-display text-primary">{metasContent.title}</h1><p>{metasContent.description}</p></header>
-  <section className="metas-page__workspace" aria-labelledby="metas-map-title">
-   <div className="metas-page__heading"><h2 id="metas-map-title">{mode === 'map' ? metasContent.mapTitle : 'Visão geral'}</h2><div className="metas-page__toolbar"><div className="metas-page__switch" role="group" aria-label="Modo de visualização"><button type="button" aria-label="Visualizar mapa" aria-pressed={mode==='map'} onClick={()=>setMode('map')}><MapPinned/></button><button type="button" aria-label="Visão geral de metas e orçamento" aria-pressed={mode==='stats'} onClick={()=>setMode('stats')}><BarChart3/></button></div></div></div>
-   {mode === 'map' ? <div className="metas-page__grid">
-    <section className="metas-page__map-panel" aria-label="Mapa e estatísticas">
-     <div className="metas-page__map-shell"><Suspense fallback={<div className="metas-page__map-loading">Carregando mapa…</div>}><MetasMap metas={metas} features={features} activeCode={activeCode} onBounds={setBounds} onSelect={selectPin} resetKey={resetKey}/></Suspense></div>
-      <div className="metas-page__map-footer"><button type="button" className="metas-page__map-action" onClick={reset}>Ver São Paulo inteira</button><span>{bounds ? (bounds.zoom??0)>=11.15 ? 'Zoom próximo: lista da subprefeitura no centro' : 'Área visível: lista das subprefeituras na tela' : 'Todas as áreas · todos os números das metas no mapa'}</span></div>
-      {territories.data?.source==='local'&&<p className="metas-page__map-warning">Pins por subprefeitura, usando os limites territoriais do GeoJSON. Os pontos são referências das áreas, não endereços de obras.</p>}
-      {territories.isError&&<p className="metas-page__map-warning" role="alert">{territories.error?.message??metasContent.noGeo}</p>}
+  const maskPayload = useQuery({
+    queryKey: ['pdm-v2', 'geo', 'mascara', 'api'],
+    queryFn: ({ signal }) => getMascaraGeojson(signal),
+    staleTime: 30 * 60_000, retry: 0,
+  })
+
+  const metas = data?.metas ?? NO_METAS
+  const territories = useMemo(() => getTerritories(subprefPayload.data), [subprefPayload.data])
+  const allPublishedPoints = useMemo(() => getPublishedPoints(mapPayload.data, metas), [mapPayload.data, metas])
+  const explicitNotPublished = (mapPayload.data as { metadata?: { fonte_publicada?: boolean } } | undefined)
+    ?.metadata?.fonte_publicada === false
+  const missingGlobalPoints = !!mapPayload.data && allPublishedPoints.length === 0
+  const individual = useQuery({
+    queryKey: ['pdm-v2', 'geo', 'individual', metas.map(meta => meta.codigo).join(',')],
+    queryFn: ({ signal }) => loadPublishedIndividual(metas, signal),
+    enabled: !!metas.length && missingGlobalPoints && !explicitNotPublished,
+    staleTime: 15 * 60_000, retry: 0,
+  })
+  const points = useMemo(() => {
+    if (allPublishedPoints.length) return allPublishedPoints
+    return getPublishedPoints({ items: individual.data?.raw }, metas)
+  }, [allPublishedPoints, individual.data, metas])
+
+  const filtered = useMemo(() => metas.filter(meta =>
+    searchMatches(meta, search) && (!axis || sameName(meta.eixo.nome, axis))), [metas, axis, search])
+  const byCode = useMemo(() => {
+    const codes = new Map<string, Set<string>>()
+    for (const point of points) {
+      const key = territoryForPoint(point.position, territories.features)
+      if (!key) continue
+      const list = codes.get(point.code) ?? new Set<string>()
+      list.add(key)
+      codes.set(point.code, list)
+    }
+    return codes
+  }, [points, territories.features])
+  const selectedName = territory ? territories.features.find(f => f.properties.pdmKey === territory) : undefined
+  const selectedTerritoryName = selectedName ? territoryName(selectedName) : ''
+
+  const regionalMetas = useMemo(() => territory ? filtered.filter(meta => meta.regionalizada && (
+    meta.subprefeituras.some(name => territoryKey(name) === territory) ||
+    !!byCode.get(meta.codigo)?.has(territory)
+  )) : [], [filtered, territory, byCode])
+  const generalMetas = useMemo(() => territory ? filtered.filter(meta => !meta.regionalizada) : [],
+    [filtered, territory])
+  const shown = territory ? [...regionalMetas, ...generalMetas] : filtered
+  const numberWithPoints = useMemo(() => new Set(points.map(point => point.code)), [points])
+
+  useEffect(() => { if (listRef.current) listRef.current.scrollTop = 0 }, [territory, axis, search])
+
+  function selectPoint(code: string) {
+    setActiveCode(code)
+    requestAnimationFrame(() => listRef.current?.querySelector<HTMLElement>(`[data-meta-code="${code}"]`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  }
+  function openMeta(code: string) {
+    setActiveCode(code)
+    setSelectedCode(code)
+  }
+  function renderMeta(meta: MetaSummary) {
+    const aggregated = territory && meta.regionalizada &&
+      meta.subprefeituras.some(name => territoryKey(name) === territory) &&
+      !byCode.get(meta.codigo)?.has(territory)
+    return <div key={meta.codigo} className="metas-rework__card-row">
+      {aggregated && <span className="metas-rework__chip metas-rework__chip--aggregated"
+        title="Meta vinculada à região, sem ponto público específico">Agregada</span>}
+      <MetaCard meta={meta} selected={meta.codigo === activeCode} onOpen={openMeta} />
+    </div>
+  }
+
+  return <div className="metas-page metas-page--rework">
+    {/* Painel permanente definido na revisão anterior: continua acima do mapa. */}
+    <OverviewPanel metas={metas} total={data?.total ?? metas.length} />
+
+    <section className="metas-rework" aria-labelledby="metas-rework-title">
+      <header className="metas-rework__heading">
+        <h1 id="metas-rework-title">VISUALIZAÇÃO REGIONALIZADA</h1>
+        <p>Aqui você encontra todas as metas do Programa.<br />
+          Use o filtro ao lado ou clique nas regiões do mapa<br />
+          para navegar. Clique na meta para ver mais detalhes.</p>
+      </header>
+      <div className="metas-rework__workspace">
+        <section className="metas-rework__map" aria-label="Visualização territorial de São Paulo">
+          <div className="metas-rework__map-body">
+            <Suspense fallback={<div className="metas-page__map-loading">Carregando mapa...</div>}>
+              <MetasMapView features={territories.features} points={points} visibleCodes={filtered.map(m => m.codigo)}
+                mask={maskPayload.data} axis={axis} territory={territory}
+                onTerritory={setTerritory} onSelectMeta={selectPoint} />
+            </Suspense>
+            {territory && <button type="button" className="metas-rework__back"
+              onClick={() => setTerritory(null)}>← Ver São Paulo inteira</button>}
+          </div>
+          {!!subprefPayload.data && territories.features.length === 0 && <p className="metas-rework__notice" role="alert">
+            A camada da API não contém polígonos identificáveis em EPSG:4326. Confira o GeoJSON público das subprefeituras.
+          </p>}
+          {subprefPayload.isError && <p className="metas-rework__notice" role="alert">
+            Não foi possível carregar o mapa das subprefeituras: {subprefPayload.error?.message}
+          </p>}
+          {mapPayload.isError && <p className="metas-rework__notice">
+            O serviço de localizações do mapa está indisponível. {mapPayload.error?.message}
+          </p>}
+          {!mapPayload.isPending && !points.length && !individual.isFetching && !subprefPayload.isPending &&
+            <p className="metas-rework__notice">Ainda não há pontos públicos autorizados para exibição neste mapa.</p>}
+          {individual.isFetching && <p className="metas-rework__notice">Consultando localizações públicas das metas...</p>}
+          {individual.data && individual.data.errors > 0 && <p className="metas-rework__notice">
+            Alguns registros geográficos não puderam ser consultados ({individual.data.errors}).
+          </p>}
+        </section>
+
+        <aside className="metas-rework__sidebar" aria-label="Filtros e lista das metas">
+          <MetasFilters metas={metas} features={territories.features} search={search} axis={axis}
+            territory={territory} onSearch={setSearch} onAxis={setAxis} onTerritory={setTerritory} />
+          <div className="metas-rework__count" role="status">
+            {shown.length} {shown.length === 1 ? 'meta' : 'metas'} {territory ? `· ${selectedTerritoryName}` : '· São Paulo'}
+            {numberWithPoints.size > 0 && !territory && <span> · {numberWithPoints.size} com pontos públicos</span>}
+          </div>
+          <div className="metas-page__list metas-rework__list" ref={listRef}>
+            {isPending ? <p className="metas-page__feedback">Consultando API de metas...</p> :
+              error ? <div className="metas-page__feedback" role="alert">
+                <p>{error.message}</p><button type="button" onClick={() => void refetch()}>Tentar novamente</button>
+              </div> : territory ? <>
+                <div className="metas-rework__group-title">Metas de {selectedTerritoryName || 'subprefeitura'}</div>
+                {regionalMetas.length ? regionalMetas.map(renderMeta) :
+                  <p className="metas-page__feedback">Nenhuma meta regionalizada corresponde aos filtros nesta região.</p>}
+                <div className="metas-rework__separator"><span>Metas gerais, não regionalizáveis</span></div>
+                {generalMetas.length ? generalMetas.map(renderMeta) :
+                  <p className="metas-page__feedback">Nenhuma meta geral corresponde aos filtros selecionados.</p>}
+              </> : shown.length ? shown.map(renderMeta) :
+                <p className="metas-page__feedback">{metasContent.noResults}</p>}
+          </div>
+        </aside>
+      </div>
+      <div className="metas-rework__legend">
+        <p><span className="metas-rework__chip metas-rework__chip--general">Não regionalizável</span>
+          Metas que se aplicam à cidade como um todo.</p>
+        <p><span className="metas-rework__chip metas-rework__chip--aggregated">Agregadas</span>
+          Metas que se aplicam às regiões, mas sem endereço público específico.</p>
+      </div>
     </section>
-    <aside className="metas-page__sidebar"><MetasFilters metas={metas} value={filters} onChange={setFilters}/><div className="metas-page__list-heading"><span>{visible.length} metas exibidas</span><span>{data?`${data.total} no total`:''}</span></div><div className="metas-page__list" ref={listRef} aria-live="polite">
-     {isPending?<p className="metas-page__feedback">Consultando nova API…</p>:error?<div className="metas-page__feedback" role="alert"><p>{error.message}</p><button onClick={()=>void refetch()} type="button">Tentar novamente</button></div>:visible.length?visible.map(meta=><MetaCard key={meta.codigo} meta={meta} selected={activeCode===meta.codigo} onOpen={openMeta}/>):<p className="metas-page__feedback">{metasContent.noResults}</p>}
-    </div></aside>
-   </div> : <OverviewPanel metas={metas} total={data?.total ?? metas.length} />}
-  </section>
-  {mode === 'map' && <NonRegionalMetasSection metas={metas} onOpen={openMeta} />}
-  <MetaModal summary={selected} onClose={()=>setSelectedCode(null)}/>
- </div>
+    {/* O card e o modal original são preservados sem modificações. */}
+    <MetaModal summary={metas.find(meta => meta.codigo === selectedCode) ?? null}
+      onClose={() => setSelectedCode(null)} />
+  </div>
 }
 export default MetasPage

@@ -24,3 +24,13 @@ export async function getMetaFilterPayload(signal?: AbortSignal): Promise<unknow
 export async function getMetaMapPayload(signal?: AbortSignal): Promise<unknown> {
   return fetchJson('metas/mapa', signal)
 }
+
+/** Camadas publicáveis. Não use /completa ou /geografia para montar pins públicos. */
+export const getSubprefeiturasGeojson = (signal?: AbortSignal): Promise<unknown> =>
+  fetchJson('fontes/camadas/subprefeituras', signal)
+export const getMascaraGeojson = (signal?: AbortSignal): Promise<unknown> =>
+  fetchJson('fontes/camadas/mascara', signal)
+export const getMetaPublishedGeojson = (code: string, signal?: AbortSignal): Promise<unknown> => {
+  if (!/^\d{1,3}$/.test(code)) throw new Error('Código inválido')
+  return fetchJson(`metas/${code.padStart(2, '0')}/fontes/geojson`, signal)
+}
