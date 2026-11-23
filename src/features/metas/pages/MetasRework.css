@@ -1,0 +1,119 @@
+/* Novo Figma 17/11: mapa com apenas duas vistas, sem ferramentas de zoom.
+   Os estilos do MetaCard e do modal original permanecem no CSS legado. */
+.metas-page--rework {
+  max-width: 1800px;
+  padding: 30px clamp(18px, 4.6vw, 70px) 100px;
+  color: #182035;
+}
+.metas-rework { margin-top: clamp(34px, 5vw, 72px); }
+.metas-rework__heading { margin: 0 0 16px; }
+.metas-rework__heading h1 {
+  margin: 0 0 12px; font-family: inherit; font-size: clamp(22px, 2.1vw, 31px);
+  font-weight: 400; line-height: 1.15; text-transform: uppercase; color: #66c5d6;
+}
+.metas-rework__heading p {
+  margin: 0; color: #151515; font-size: 15px; line-height: 1.35;
+}
+.metas-rework__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(400px, 1.0fr);
+  align-items: center;
+  gap: 0;
+  margin-top: -2px;
+}
+.metas-rework__map { min-width: 0; padding-top: 28px; }
+.metas-rework__map-body { position: relative; width: 100%; height: 780px; }
+.metas-rework__map-body .metas-map__canvas {
+  display: block; width: 100%; height: 100%; min-height: 0; border-radius: 0;
+  background: #f3f4f5; overflow: hidden;
+}
+.metas-rework__back {
+  position: absolute; z-index: 4; left: 16px; top: 16px;
+  border: 0; padding: 10px 16px; border-radius: 20px; cursor: pointer;
+  background: #0079ab; color: #fff; font-weight: 600; font-size: 12px;
+  box-shadow: 0 3px 12px #112c3940;
+}
+.metas-rework__back:hover { background: #00628d; }
+.metas-rework__back:focus-visible { outline: 3px solid #22245c; outline-offset: 2px; }
+.metas-rework__notice {
+  background: #fff4e5; color: #594226; font-size: 12px;
+  padding: 8px 10px; margin: 4px 0;
+}
+.metas-rework__sidebar {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; min-width: 0;
+  height: 870px; max-height: 865px;
+  padding: 36px clamp(16px, 3.3vw, 40px) 24px;
+  border: 1px solid #e1e3e5; border-radius: 18px;
+  background: #f8f8f8;
+  box-shadow: 0 1px 4px #00000018;
+}
+.metas-page--rework .metas-filters__top { grid-template-columns: minmax(0, 1.7fr) minmax(125px, 1fr); gap: 10px; }
+.metas-page--rework .metas-filters__quick-select,
+.metas-page--rework .metas-filters__search {
+  min-height: 37px; border-radius: 3px; background: white;
+}
+.metas-page--rework .metas-filters__quick-select select { height: 37px; }
+.metas-page--rework .metas-filters__axes { margin: 11px 0 16px; gap: 7px; }
+.metas-page--rework .metas-filters__axis {
+  min-height: 35px; border: 0; border-radius: 999px;
+  padding: 2px 2px; font-size: 14px; font-weight: 700; text-transform: uppercase;
+  color: white; background: #d6d6d6; opacity: 1; font-family: "Roboto", sans-serif; 
+  transition: background-color .2s ease, box-shadow .2s ease; outline: none;
+}
+.metas-page--rework .metas-filters__axis--selected {
+  background: var(--axis-color); box-shadow: 0px 6px 6px 0px #10213b47; outline: none; border: 1px solid white;
+}
+.metas-page--rework .metas-filters__axis--selected:focus{
+    outline: none;
+}
+.metas-page--rework .metas-filters__axis--inactive { background: #d6d6d6; }
+.metas-page--rework .metas-filters__axis:focus-visible { outline: 2px solid #272361; outline-offset: 2px; }
+.metas-rework__count { flex: 0 0 auto; color: #666; font-size: 11px; padding: 0 0 10px; }
+.metas-rework__count span { color: #888; }
+.metas-page--rework .metas-rework__list {
+  min-height: 0; overflow-y: auto; scrollbar-width: thin;
+  flex: 1; display: flex; flex-direction: column;
+  gap: 16px; padding: 1px 3px 12px;
+}
+.metas-rework__card-row { flex: 0 0 auto; position: relative; }
+/* Apenas acomodamos o card existente; não reescrevemos suas propriedades internas. */
+.metas-page--rework .metas-rework__card-row .metas-card { min-height: 148px; }
+.metas-rework__chip { display: inline-block; padding: 4px 10px; border-radius: 99px; font-size: 10px; color: white; line-height: 1.15; white-space: nowrap; }
+.metas-rework__chip--general { background: #272361; }
+.metas-rework__chip--aggregated { background: #0079ab; }
+.metas-rework__card-row > .metas-rework__chip--aggregated {
+  position: absolute; top: 6px; right: 12px; z-index: 1;
+}
+.metas-rework__group-title { flex: 0 0 auto; font-size: 12px; color: #38465a; font-weight: 700; padding: 6px 4px 0; }
+.metas-rework__separator {
+  flex: 0 0 auto; display: flex; align-items: center;
+  gap: 10px; color: #777; font-size: 11px;
+  margin: 3px 2px;
+}
+.metas-rework__separator:before,
+.metas-rework__separator:after { content: ''; display: block; flex: 1; height: 1px; background: #d7d7d7; }
+.metas-rework__separator span { flex: 0 0 auto; }
+.metas-rework__legend { margin-left: 51%; padding: 22px 4px 8px; display: grid; gap: 8px; }
+.metas-rework__legend p { display: flex; align-items: center; gap: 14px; margin: 0; font-size: 12px; color: #777; }
+.metas-rework__legend .metas-rework__chip { min-width: 114px; text-align: center; }
+@media (max-width: 980px) {
+  .metas-rework__workspace { grid-template-columns: 1fr; gap: 18px; margin-top: 14px; }
+  .metas-rework__map { padding-top: 0; }
+  .metas-rework__map-body { height: min(70vw, 520px); min-height: 330px; }
+  .metas-rework__sidebar { height: 650px; max-height: 650px; padding: 22px 16px; }
+  .metas-rework__legend { margin-left: 0; padding-top: 10px; }
+}
+@media (max-width: 540px) {
+  .metas-page--rework { padding-inline: 12px; }
+  .metas-rework__heading p { font-size: 13px; }
+  .metas-rework__map-body { min-height: 300px; }
+  .metas-rework__sidebar { height: 600px; max-height: 600px; }
+  .metas-page--rework .metas-filters__axes { gap: 4px; }
+  .metas-page--rework .metas-filters__axis { font-size: 9px; padding: 4px 1px; }
+  .metas-rework__legend p { align-items: flex-start; font-size: 11px; }
+  .metas-rework__legend .metas-rework__chip { min-width: 100px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .metas-page--rework .metas-filters__axis { transition: none; }
+}
